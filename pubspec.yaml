@@ -1,0 +1,34 @@
+name: rentshare_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.5.4
+  http: ^1.6.0
+  intl: ^0.20.2
+  provider: ^6.1.5+1
+  icons_flutter: ^0.0.5
+  carousel_slider: ^5.1.1
+  flutter_facebook_auth: ^7.1.5
+  google_sign_in: ^6.1.5
+  image_picker: ^1.2.1
+  http_parser: ^4.1.2
+  flutter_rating_bar: ^4.0.1
+  dotted_border: ^2.0.0
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
