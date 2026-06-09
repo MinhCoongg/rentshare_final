@@ -99,7 +99,11 @@ class Step3PricingInfo extends StatelessWidget {
                               focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.5)),
                             ),
                             onChanged: (v) {
-                              vm.updateTierPriceValue(index, minDays: int.tryParse(v) ?? 1);
+                              int parsedDays = int.tryParse(v) ?? 1;
+                              if (parsedDays <= 0) {
+                                parsedDays = 1;
+                              }
+                              vm.updateTierPriceValue(index, minDays: parsedDays);
                             },
                           ),
                         ),

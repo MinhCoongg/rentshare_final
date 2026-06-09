@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:rentshare_app/utils/sharetoken_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ✨ THÊM THƯ VIỆN NÀY ĐỂ LƯU TOKEN
+import 'package:shared_preferences/shared_preferences.dart'; 
 import 'package:rentshare_app/models/login_model.dart';
 import 'package:rentshare_app/models/user_model.dart';
 import 'package:rentshare_app/services/login_services.dart';
@@ -44,6 +43,8 @@ class LoginViewModel extends ChangeNotifier {
       _currentUser = result['user'] as UserModel;
       _token = result['token'] ?? '';
       await SharedPrefsUtils.saveToken(_token);
+    
+      
 
       return null; 
     } else {

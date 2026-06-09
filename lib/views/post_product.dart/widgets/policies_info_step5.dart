@@ -111,7 +111,7 @@ class Step5PoliciesInfo extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         TextFormField(
-                          key: ValueKey("user_policy_${index}_${policy.content.length}"),
+                          key: ValueKey("user_policy_$index"),
                           initialValue: policy.content,
                           maxLines: 3,
                           minLines: 2,
@@ -178,7 +178,7 @@ class Step5PoliciesInfo extends StatelessWidget {
                           const Text("Quy định minh bạch", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
                           const SizedBox(height: 4),
                           Text(
-                            "Nội dung này sẽ hiển thị trực tiếp ở trang chi tiết sản phẩm. Hãy ghi rõ ràng để bảo vệ quyền lợi món đồ của ní nha.",
+                            "Nội dung này sẽ hiển thị trực tiếp ở trang chi tiết sản phẩm. Hãy ghi rõ ràng để bảo vệ quyền lợi món đồ.",
                             style: TextStyle(color: Colors.grey[600], fontSize: 12, height: 1.4, fontWeight: FontWeight.w500),
                           ),
                         ],

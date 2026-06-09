@@ -84,6 +84,9 @@ class PostProductScreen extends StatelessWidget {
 
   String _getStepTitle(int step) {
     const titles = ["Thông tin cơ bản", "Chi tiết sản phẩm", "Giá thuê", "Địa điểm", "Chính sách", "Xem trước", "Thành công"];
+    if (step >= titles.length) {
+    return "Hoàn thành đăng bài";
+  }
     return titles[step];
   }
 
@@ -144,7 +147,58 @@ class PostProductScreen extends StatelessWidget {
     );
   }
 
+ 
   Widget _buildStep7() {
-    return const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.check_circle, size: 100, color: Colors.green), SizedBox(height: 20), Text("Đăng bài thành công!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold))]));
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, size: 100, color: Colors.green),
+            const SizedBox(height: 20),
+
+            const Text(
+              "Đăng sản phẩm thành công!",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            
+            const Text(
+              "Sản phẩm của bạn đang được duyệt bởi đội ngũ RentShare. Bạn sẽ nhận được thông báo khi sản phẩm được hiển thị.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 30),
+            
+            ElevatedButton(
+              onPressed: () { /* Điều hướng qua kho hàng */ },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 45),
+                backgroundColor: const Color(0xFF0056D2),
+              ),
+              child: const Text("Xem sản phẩm của tôi", style: TextStyle(color: Colors.white)),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton(
+              onPressed: () { /* Reset model và quay về bước 0 */ },
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 45),
+                side: const BorderSide(color: Color(0xFF0056D2)),
+              ),
+              child: const Text("Đăng thêm sản phẩm", style: TextStyle(color: Color(0xFF0056D2))),
+            ),
+            const SizedBox(height: 15),
+            
+            TextButton(
+              onPressed: () { /* Quay về màn hình chính Home */ },
+              child: const Text("Về trang chủ", style: TextStyle(color: Colors.grey)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
+
+
 }

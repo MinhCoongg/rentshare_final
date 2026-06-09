@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:rentshare_app/models/address_model.dart';
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
-
+import 'package:rentshare_app/views/post_product.dart/widgets/formAddress.dart';
 
 class Step4LocationInfo extends StatefulWidget {
   final PostProductViewModel vm;
@@ -14,17 +15,152 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.vm.loadUserAddressBook();
+    });
+
     if (widget.vm.model.features.isEmpty) {
       widget.vm.model.features.add("");
     }
-    if (widget.vm.model.location.isEmpty) {
-      widget.vm.model.location = "123 Nguyễn Văn Cừ, P. Bến Thành, Quận 1, TP. HCM";
-    }
+  }
+
+  void _showAddressBookBottomSheet(BuildContext context, PostProductViewModel vm) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      isScrollControlled: true,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Sổ địa chỉ kho bãi của bạn",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+                        onPressed: () => Navigator.pop(context),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  if (vm.isLoadingAddress)
+                    const Expanded(
+                      child: Center(child: CircularProgressIndicator(color: Color(0xFF1976D2))),
+                    )
+                  else if (vm.userAddressBook.isEmpty)
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          "Sổ địa chỉ trống trơn!\nHãy tạo địa chỉ kho bãi để đăng bài nhé.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey[400], fontSize: 13, height: 1.4),
+                        ),
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: vm.userAddressBook.length,
+                        itemBuilder: (context, index) {
+                          final AddressModel addr = vm.userAddressBook[index];
+                          final int currentId = addr.id ?? 0;
+                          final bool isSelected = vm.model.addressId == currentId;
+
+                          return InkWell(
+                            onTap: () {
+                              vm.selectAddressFromBook(currentId, addr.fullAddress);
+                              Navigator.pop(context); 
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isSelected ? const Color(0xFF1976D2).withOpacity(0.02) : Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected ? const Color(0xFF1976D2) : Colors.grey[200]!,
+                                  width: isSelected ? 1.5 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                                    color: isSelected ? const Color(0xFF1976D2) : Colors.grey,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(addr.receiverName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
+                                            if (addr.isDefault) ...[
+                                              const SizedBox(width: 6),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                                decoration: BoxDecoration(color: Colors.blue[50], borderRadius: BorderRadius.circular(4)),
+                                                child: const Text("Mặc định", style: TextStyle(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
+                                              )
+                                            ]
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(addr.fullAddress, style: TextStyle(color: Colors.grey[600], fontSize: 12, height: 1.3)),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = widget.vm;
+
+    String currentLabel = "Địa chỉ kho";
+    for (var addr in vm.userAddressBook) {
+      if (addr.id == vm.model.addressId) {
+        currentLabel = addr.receiverName;
+      }
+    }
 
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -33,6 +169,7 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               const Row(
                 children: [
                   Text("Địa chỉ kho / nơi lưu sản phẩm", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black)),
@@ -40,51 +177,46 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
                 ],
               ),
               const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: Colors.green[50],
-                      child: const Icon(Icons.location_on_outlined, color: Colors.green, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Text("Kho của tôi", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: Colors.blue[50], borderRadius: BorderRadius.circular(4)),
-                                child: const Text("Mặc định", style: TextStyle(color: Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            vm.model.location,
-                            style: TextStyle(color: Colors.grey[600], fontSize: 13, height: 1.3),
-                          ),
-                        ],
+              
+              InkWell(
+                onTap: () => _showAddressBookBottomSheet(context, vm),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: Colors.green[50],
+                        child: const Icon(Icons.location_on_outlined, color: Colors.green, size: 20),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right, color: Colors.black54),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(currentLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                            const SizedBox(height: 4),
+                            Text(
+                              vm.model.location.isNotEmpty ? vm.model.location : "Đang tải dữ liệu địa chỉ...",
+                              style: TextStyle(color: Colors.grey[600], fontSize: 13, height: 1.3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.unfold_more, color: Colors.black54, size: 20), // Biểu tượng báo hiệu bấm vào để bung lựa chọn
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
-              
+            
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 46),
@@ -92,16 +224,22 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
                   backgroundColor: const Color(0xFFF5F9FF),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: () {}, 
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AddAddressDialog(vm: vm), 
+                  );
+                }, 
                 icon: const Icon(Icons.add, size: 16, color: Color(0xFF1976D2)),
-                label: const Text("Thêm địa chỉ khác", style: TextStyle(color: Color(0xFF1976D2), fontWeight: FontWeight.bold, fontSize: 13)),
+                label: const Text(
+                  "Thêm địa chỉ khác", 
+                  style: TextStyle(color: Color(0xFF1976D2), fontWeight: FontWeight.bold, fontSize: 13)
+                ),
               ),
               const SizedBox(height: 24),
               Container(height: 1, color: Colors.grey[100]),
               const SizedBox(height: 20),
 
-             
-              // ===============================================================
               const Row(
                 children: [
                   Text("Đặc điểm nổi bật của sản phẩm", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black)),
@@ -115,7 +253,6 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
               ),
               const SizedBox(height: 16),
 
-              // Vòng lặp sinh động danh sách các ô nhập đặc điểm nổi bật
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -136,7 +273,7 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextFormField(
-                            key: ValueKey("feat_${index}_${featureText.length}"),
+                            key: ValueKey("feat_$index"),
                             initialValue: featureText,
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                             decoration: InputDecoration(
@@ -151,8 +288,6 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
                             onChanged: (v) => vm.updateFeatureValue(index, v),
                           ),
                         ),
-                        
-                        // Nút xóa Thùng rác (Ẩn đi nếu chỉ còn duy nhất 1 dòng)
                         if (vm.model.features.length > 1)
                           IconButton(
                             icon: const Icon(Icons.delete_outline, color: Colors.grey, size: 22),
@@ -167,7 +302,6 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
               ),
               const SizedBox(height: 16),
 
-              // Nút Thêm đặc điểm viền nét đứt (Dashed Border style) chuẩn hình gửi
               GestureDetector(
                 onTap: vm.model.features.length < 8 ? () => vm.addFeatureField() : null,
                 child: Container(
@@ -176,7 +310,7 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.blue.shade200, style: BorderStyle.solid), // Tạo nét vẽ bám biên gọn gàng
+                    border: Border.all(color: Colors.blue.shade200, style: BorderStyle.solid),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
