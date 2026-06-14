@@ -266,7 +266,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
           color: Colors.white, 
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06), 
+              color: Colors.black.withValues(alpha: 0.06), 
               blurRadius: 10, 
               offset: const Offset(0, -4),
             )
@@ -289,7 +289,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
                     title: item.title,
                     image: item.images.isNotEmpty ? item.images.first : '', 
                     quantity: 1, 
-                    maxStock: item.quantity ?? 1,
+                    maxStock: item.quantity,
                     depositAmount: double.tryParse(item.depositAmount) ?? 0.0, 
                   );
                   final cartProvider = context.read<RentalCartProvider>();
