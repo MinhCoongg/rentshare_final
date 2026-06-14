@@ -9,11 +9,13 @@ class PolicyModel {
 
   factory PolicyModel.fromJson(Map<String, dynamic> json) {
     return PolicyModel(
-      type: json['policyType'] ?? '',
+      type: json['policyType'] ?? '', 
       content: json['content'] ?? '',
     );
   }
-  
+
+  String get policyType => type;
+
   Map<String, String> toJson() => {
     'type': type, 
     'content': content

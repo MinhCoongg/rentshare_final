@@ -13,7 +13,6 @@ dependencies:
   http: ^1.6.0
   intl: ^0.20.2
   provider: ^6.1.5+1
-  icons_flutter: ^0.0.5
   carousel_slider: ^5.1.1
   flutter_facebook_auth: ^7.1.5
   google_sign_in: ^6.1.5

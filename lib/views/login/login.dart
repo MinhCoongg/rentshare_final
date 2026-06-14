@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/login_viewmodel.dart';
-import 'package:rentshare_app/views/login/widget_login/bottomConner.dart';
+
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -166,7 +166,7 @@ class _LoginViewState extends State<LoginView> {
                                           );
                                           
                                          
-                                          Navigator.pushReplacementNamed(context, '/post_product');
+                                          Navigator.pushReplacementNamed(context, '/home');
                                           
                                         } else {
                                           ScaffoldMessenger.of(context).showSnackBar(

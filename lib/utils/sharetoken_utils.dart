@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefsUtils {
   
   static const String _tokenKey = "user_token";
-  static const String _userId = "user_id";
   static Future<String> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey) ?? '';

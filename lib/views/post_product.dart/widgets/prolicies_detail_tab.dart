@@ -8,7 +8,7 @@ class PolicyTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (item.policies == null || item.policies.isEmpty) {
+    if (item.policies.isEmpty) {
       return const Center(
         child: Text("Chưa có chính sách cho sản phẩm này"),
       );
@@ -28,7 +28,7 @@ class PolicyTab extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          ...item.policies!.map((p) => PolicyCard(policy: p)).toList(),
+          ...item.policies.map((p) => PolicyCard(policy: p)),
 
           const SizedBox(height: 100),
         ],
@@ -50,7 +50,6 @@ class PolicyCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -69,20 +68,18 @@ class PolicyCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-              _getIcon(policy.policyType ?? policy.title),
+              _getIcon(policy.policyType),
               color: const Color(0xFF0056D2),
               size: 22,
             ),
           ),
-
           const SizedBox(width: 16),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  policy.policyType ?? policy.title,
+                  policy.policyType,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -105,12 +102,13 @@ class PolicyCard extends StatelessWidget {
       ),
     );
   }
+
   IconData _getIcon(String type) {
     final t = type.toLowerCase();
     if (t.contains('thời gian')) return Icons.access_time_rounded;
     if (t.contains('trễ')) return Icons.warning_amber_rounded;
     if (t.contains('cọc')) return Icons.security_outlined;
-    if (t.contains('bồi')) return Icons.build_circle_outlined;
+    if (t.contains('bồi') || t.contains('mất')) return Icons.gavel_rounded; // Đổi sang Icon búa giống Figma cho ngầu ní ơi
     if (t.contains('giao')) return Icons.local_shipping_outlined;
     if (t.contains('hủy')) return Icons.cancel_outlined;
     return Icons.info_outline;
