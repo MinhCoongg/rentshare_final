@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
+import 'package:rentshare_app/views/checkout_page/checkout.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -341,7 +342,7 @@ class CartPage extends StatelessWidget {
                         elevation: 0,
                       ),
                       onPressed: () {
-                        // Kích hoạt tuyến đường mở sang trang chọn thời gian và phương thức thanh toán tiếp theo!
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => CheckoutPage()));
                       },
                       child: const Text(
                         "Tiến hành thuê",
