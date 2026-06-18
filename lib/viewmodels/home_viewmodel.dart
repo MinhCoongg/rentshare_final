@@ -10,7 +10,7 @@ class HomeViewModel extends ChangeNotifier {
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
 
-  // 🎯 QUẢN LÝ ĐỘC LẬP 3 LUỒNG SẢN PHẨM TRANG CHỦ
+
   List<ProductHomeModel> _featuredProducts = [];
   List<ProductHomeModel> _newestProducts = [];
   List<ProductHomeModel> _suggestedProducts = [];

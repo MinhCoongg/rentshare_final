@@ -1,5 +1,6 @@
 import 'package:rentshare_app/models/policy_model.dart';
 import 'package:rentshare_app/models/reviews_model.dart';
+import 'package:rentshare_app/models/shopinfo_model.dart';
 import 'package:rentshare_app/models/tierPerDay_model.dart';
 
 class ProductModel {
@@ -13,6 +14,7 @@ class ProductModel {
   final List<PolicyModel> policies;
   final List<TierPricingModel> tierPricings; 
   final int rentedCount, quantity;
+  final ShopInfo? shopInfo;
 
   ProductModel({
     required this.id, required this.title, required this.description,
@@ -23,7 +25,8 @@ class ProductModel {
     required this.images, required this.specifications, 
     required this.reviews, required this.policies,
     required this.tierPricings,
-    required this.rentedCount, required this.quantity
+    required this.rentedCount, required this.quantity,
+    this.shopInfo
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -68,6 +71,9 @@ class ProductModel {
           .toList(),
       rentedCount: json['rentedCount'],
       quantity: json['quantity'] ?? 1,
+      shopInfo: json['shopInfo'] != null
+        ? ShopInfo.fromJson(json['shopInfo'])
+        : null,
     );
   }
 }

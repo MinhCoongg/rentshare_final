@@ -342,7 +342,16 @@ class CartPage extends StatelessWidget {
                         elevation: 0,
                       ),
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => CheckoutPage()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CheckoutPage(
+                              productId: cartItems.first.productId,
+                              product: cartItems.first,
+                              shopAddress: cartItems.first.ownerAddress 
+                            ),
+                          ),
+                        );
                       },
                       child: const Text(
                         "Tiến hành thuê",

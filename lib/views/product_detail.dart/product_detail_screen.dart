@@ -291,6 +291,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
                     quantity: 1, 
                     maxStock: item.quantity,
                     depositAmount: double.tryParse(item.depositAmount) ?? 0.0, 
+                    ownerAddress: item.location
                   );
                   final cartProvider = context.read<RentalCartProvider>();
                   String result = await cartProvider.addToCart(newItem);

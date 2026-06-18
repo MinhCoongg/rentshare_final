@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rentshare_app/viewmodels/addresses_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/home_viewmodel.dart'; 
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/product_detail_viewmodel.dart';
@@ -17,6 +19,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => ProductDetailViewModel()), 
         ChangeNotifierProvider(create: (_) => HomeViewModel()), 
         ChangeNotifierProvider(create: (_) => RentalCartProvider()),
+        ChangeNotifierProvider(create: (_) => CheckoutViewModel()),
+        ChangeNotifierProvider(create: (_) => AddressViewModel()),
       ],
       child: const MainApp(),
     ),
@@ -31,7 +35,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'RentShare App',
-      initialRoute: '/home',
+      initialRoute: '/login',
       theme: ThemeData(primarySwatch: Colors.blue),
       routes: {
         '/login': (context) => const LoginView(),

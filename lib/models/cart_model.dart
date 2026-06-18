@@ -3,10 +3,11 @@ class RentalCartItem {
   final int ownerId;
   final String ownerName; 
   final String ownerAvatar;
+  final String ownerAddress; 
   final String title;
   final String image;
   final double pricePerDay;
-  final int maxStock; // 🎯 1. BƠM TRƯỜNG SỐ LƯỢNG KHO THẬT TRONG DB VÀO ĐÂY NÍ!
+  final int maxStock; 
   int quantity;
   double depositAmount;
 
@@ -15,6 +16,7 @@ class RentalCartItem {
     required this.ownerId,
     required this.ownerName, 
     required this.ownerAvatar,
+    required this.ownerAddress, 
     required this.title,
     required this.image,
     required this.pricePerDay,
@@ -28,7 +30,8 @@ class RentalCartItem {
       "productId": productId,
       "ownerId": ownerId,
       "ownerName": ownerName, 
-      "ownerAvatar" : ownerAvatar,
+      "ownerAvatar": ownerAvatar,
+      "ownerAddress": ownerAddress, 
       "title": title,
       "image": image,
       "pricePerDay": pricePerDay,
@@ -44,6 +47,7 @@ class RentalCartItem {
       ownerId: json["ownerId"] ?? 0,
       ownerName: json["ownerName"] ?? 'Chủ shop Rentshare',
       ownerAvatar: json['ownerAvatar'] ?? 'rentshare.png',
+      ownerAddress: json['ownerAddress'] ?? 'Địa chỉ shop đang cập nhật...',
       title: json["title"] ?? '',
       image: json["image"] ?? '',
       pricePerDay: (json["pricePerDay"] as num?)?.toDouble() ?? 0.0,
