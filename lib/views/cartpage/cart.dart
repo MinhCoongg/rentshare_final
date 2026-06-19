@@ -346,7 +346,6 @@ class CartPage extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => CheckoutPage(
-                              productId: cartItems.first.productId,
                               product: cartItems.first,
                               shopAddress: cartItems.first.ownerAddress 
                             ),

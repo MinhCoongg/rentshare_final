@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart'; 
 import 'package:rentshare_app/views/checkout_page/widget/formAddress.dart';
 import 'package:rentshare_app/views/checkout_page/widget/selected_addresses.dart';
-
+import 'package:rentshare_app/views/payment/payment.dart';
 
 class CheckoutPage extends StatefulWidget {
-  final int productId;
   final dynamic product; 
   final String shopAddress; 
 
   const CheckoutPage({
     super.key,
-    required this.productId,
     required this.product,
     required this.shopAddress, 
   });
@@ -27,7 +26,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CheckoutViewModel>().fetchCheckoutData(widget.productId);
+      final cartProvider = Provider.of<RentalCartProvider>(context, listen: false);
+      final checkoutVM = context.read<CheckoutViewModel>();
+      
+      checkoutVM.setCartItems(cartProvider.items);
+      checkoutVM.fetchCheckoutData();
     });
   }
 
@@ -36,6 +39,23 @@ class _CheckoutPageState extends State<CheckoutPage> {
       context: context,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      selectableDayPredicate: (
+        DateTime day,
+        DateTime? selectedStartDay,
+        DateTime? selectedEndDay,
+      ) {
+       
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        if (day.isBefore(today)) {
+          return false;
+        }
+
+        final formattedDay =
+            "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
+        return !vm.bookedDates.contains(formattedDay);
+      },
+      
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -45,6 +65,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         );
       },
     );
+    
     if (picked != null) {
       vm.setDateRange(picked);
     }
@@ -131,7 +152,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   const SizedBox(height: 24),
 
-                 
                   const Text("Hình thức nhận hàng", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
                   const SizedBox(height: 12),
                   
@@ -178,8 +198,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
                                     isScrollControlled: true,
                                     builder: (context) => SelectAddressSheet(
-                                      checkoutVM: checkoutVM,
-                                      productId: widget.productId, 
+                                      checkoutVM: checkoutVM, 
                                     ),
                                   );
                                 },
@@ -222,14 +241,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               ],
                               const SizedBox(height: 16),
                               
-                             
                               GestureDetector(
                                 onTap: () {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AddAddressCheckoutDialog(checkoutVM: checkoutVM),
                                   ).then((_) {
-                                    checkoutVM.fetchCheckoutData(widget.productId);
+                                    checkoutVM.fetchCheckoutData();
                                   });
                                 },
                                 child: const Text("+ Thêm địa chỉ mới", style: TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.w600, fontSize: 12)),
@@ -289,6 +307,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       Text(widget.product.ownerName ?? "Chủ shop Rentshare", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                                       const SizedBox(height: 6),
                                       Text(
+                                        "Liên hệ: ${widget.product.ownerPhone}",
+                                        style: const TextStyle(fontSize: 12, color: Color(0xFF4F46E5), fontWeight: FontWeight.w500),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
                                         widget.shopAddress,
                                         style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.4),
                                       ),
@@ -325,10 +348,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   elevation: 0,
                 ),
                 onPressed: checkoutVM.selectedDateRange == null
-                    ? null 
-                    : () {
-                       
-                      },
+                  ? null 
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PaymentPage(), 
+                        ),
+                      );
+                    },
                 child: const Text("Tiếp tục", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
               ),
             ),

@@ -4,12 +4,9 @@ import 'package:rentshare_app/views/checkout_page/widget/formAddress.dart';
 
 class SelectAddressSheet extends StatelessWidget {
   final CheckoutViewModel checkoutVM;
-  final int productId; 
-
   const SelectAddressSheet({
     super.key, 
     required this.checkoutVM,
-    required this.productId,
   });
 
   @override
@@ -139,7 +136,7 @@ class SelectAddressSheet extends StatelessWidget {
                       builder: (context) => AddAddressCheckoutDialog(checkoutVM: checkoutVM), 
                     ).then((_) {
                       // 🎯 3. ĐÃ SỬA LUỒNG TỰ ĐỘNG: Thêm xong tắt Dialog là bộ não tự đi chợ kéo dữ liệu mới đổ lên màn hình liền!
-                      checkoutVM.fetchCheckoutData(productId);
+                      checkoutVM.fetchCheckoutData();
                     });
                   }, 
                   icon: const Icon(Icons.add, size: 16, color: Color(0xFF4F46E5)),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:rentshare_app/models/address_model.dart';
+import 'package:rentshare_app/models/cart_model.dart';
+import 'package:rentshare_app/models/orderRequest_model.dart';
 import 'package:rentshare_app/models/tierPerDay_model.dart';
-import 'package:rentshare_app/services/address_services.dart'; 
+import 'package:rentshare_app/services/address_services.dart';
+import 'package:rentshare_app/services/bookdateProduct_service.dart'; 
 import 'package:rentshare_app/services/checkout_service.dart';
-import 'package:rentshare_app/services/pricing_service.dart';
 
 class CheckoutViewModel extends ChangeNotifier {
   final CheckoutService _checkoutService = CheckoutService();
@@ -13,12 +15,9 @@ class CheckoutViewModel extends ChangeNotifier {
   AddressModel? _defaultAddress; 
   String _deliveryMethod = 'Shipping'; 
   DateTimeRange? _selectedDateRange;
-
   List<AddressModel> _userAddresses = [];
-  List<TierPricingModel> _productTiers = [];
-
-  
-  
+  List<String> _bookedDates = [];
+  List<RentalCartItem> _currentCartItems = [];
 
   bool get isLoading => _isLoading;
   double get walletBalance => _walletBalance;
@@ -26,8 +25,8 @@ class CheckoutViewModel extends ChangeNotifier {
   String get deliveryMethod => _deliveryMethod;
   DateTimeRange? get selectedDateRange => _selectedDateRange;
   List<AddressModel> get userAddresses => _userAddresses; 
-  List<TierPricingModel> get productTiers => _productTiers; 
   
+  List<String> get bookedDates => _bookedDates;
 
   int get rentalDays {
     if (_selectedDateRange == null) return 0;
@@ -35,57 +34,51 @@ class CheckoutViewModel extends ChangeNotifier {
     return days == 0 ? 1 : days;
   }
 
-  double getApplicablePricePerDay(double basePricePerDay) {
+  double getRentalFeeOfItem(RentalCartItem item) {
     int days = rentalDays;
-    if (days == 0 || _productTiers.isEmpty) return basePricePerDay;
+    if (days == 0) return 0;
 
-    List<TierPricingModel> sortedTiers = List.from(_productTiers);
-    sortedTiers.sort((a, b) => b.minDays.compareTo(a.minDays));
+    double pricePerDay = item.pricePerDay;
 
-    for (var tier in sortedTiers) {
-      if (days >= tier.minDays) {
-        return tier.pricePerDay; 
+    if (item.tierPricings.isNotEmpty) {
+      List<TierPricingModel> sortedTiers = List.from(item.tierPricings);
+      sortedTiers.sort((a, b) => b.minDays.compareTo(a.minDays));
+
+      for (var tier in sortedTiers) {
+        if (days >= tier.minDays) {
+          pricePerDay = tier.pricePerDay;
+          break;
+        }
       }
     }
-    return basePricePerDay; 
+    return pricePerDay * days * item.quantity;
   }
 
-  double getRentalFee(double basePricePerDay) {
-    return getApplicablePricePerDay(basePricePerDay) * rentalDays;
+  double calculateTotalRentalFee(List<RentalCartItem> cartItems) {
+    double total = 0.0;
+    for (var item in cartItems) {
+      total += getRentalFeeOfItem(item);
+    }
+    return total;
   }
 
   double getShippingFee() {
     return (_deliveryMethod == 'Shipping') ? 30000.0 : 0.0;
   }
 
-  double getTotalAmount(double basePricePerDay, double totalDeposit) {
-    return getRentalFee(basePricePerDay) + totalDeposit + getShippingFee();
+  
+  void setCartItems(List<RentalCartItem> items) {
+    _currentCartItems = items;
   }
 
-
-  Future<void> fetchCheckoutData(int productId) async {
+  Future<void> fetchCheckoutData() async {
     _isLoading = true;
     notifyListeners();
 
     try {
       final result = await _checkoutService.getCheckoutInfo();
-      if (result != null) {
-        _walletBalance = result.walletBalance;
-      }
-    } catch (e) {
-      debugPrint("Lỗi API bốc thông tin ví: $e");
-    }
-    
+      if (result != null) _walletBalance = result.walletBalance;
 
-    try {
-      final tiersResult = await TierService.fetchProductTiers(productId);
-      _productTiers = tiersResult;
-    } catch (e) {
-      debugPrint("Lỗi API bốc bảng bậc giá sản phẩm: $e");
-    }
-
-
-    try {
       final addressesResult = await AddressService.fetchUserAddresses();
       _userAddresses = addressesResult;
 
@@ -97,13 +90,20 @@ class CheckoutViewModel extends ChangeNotifier {
       } else {
         _defaultAddress = null;
       }
+
+
+      _bookedDates.clear();
+      if (_currentCartItems.isNotEmpty) {
+        List<int> productIds = _currentCartItems.map((e) => e.productId).toList();
+        _bookedDates = await BookDateProduct.fetchBookedDates(productIds);
+      }
+
     } catch (e) {
-      debugPrint("Lỗi API bốc sổ địa chỉ người nhận (Dính chặn 401): $e");
-      _defaultAddress = null; 
+      debugPrint("Lỗi fetch dữ liệu Checkout: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    
-    _isLoading = false;
-    notifyListeners();
   }
 
   void setDateRange(DateTimeRange range) {
@@ -116,13 +116,65 @@ class CheckoutViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isWalletBalanceEnough(double totalAmount) {
-    return _walletBalance >= totalAmount;
-  }
-
- 
   void selectAddressFromBook(AddressModel chosenAddress) {
     _defaultAddress = chosenAddress;
     notifyListeners();
+  }
+
+
+  
+  Future<bool> createOrder(List<RentalCartItem> cartItems) async {
+    if (_selectedDateRange == null || _defaultAddress == null) return false;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      String startStr = "${_selectedDateRange!.start.year}-${_selectedDateRange!.start.month.toString().padLeft(2, '0')}-${_selectedDateRange!.start.day.toString().padLeft(2, '0')}";
+      String endStr = "${_selectedDateRange!.end.year}-${_selectedDateRange!.end.month.toString().padLeft(2, '0')}-${_selectedDateRange!.end.day.toString().padLeft(2, '0')}";
+      double rentalFee = calculateTotalRentalFee(cartItems);
+      double shippingFee = getShippingFee();
+      
+      double depositFee = 0.0;
+      for (var item in cartItems) {
+        depositFee += (item.depositAmount * item.quantity);
+      }
+      
+      double totalAmount = rentalFee + shippingFee + depositFee;
+      String dbShippingMethod = (_deliveryMethod == 'Shipping') 
+          ? 'DeliverToHome' 
+          : 'SelfPickUp';
+      RentalOrderRequestModel orderRequest = RentalOrderRequestModel(
+        startDate: startStr,
+        endDate: endStr,
+        shippingMethod: dbShippingMethod,
+        receiverName: _defaultAddress!.receiverName,
+        receiverPhone: _defaultAddress!.receiverPhone,
+        fullAddress: _defaultAddress!.fullAddress,
+        shippingFee: shippingFee,
+        rentalFee: rentalFee,
+        depositFee: depositFee,
+        totalAmount: totalAmount,
+        items: cartItems,
+      );
+
+
+      final res = await _checkoutService.submitRentalOrder(
+        orderData: orderRequest, 
+      );
+
+      if (res != null && res['success'] == true) {
+        return true;
+      } else {
+        debugPrint("Đặt đơn thất bại từ hệ thống: ${res?['message']}");
+        return false;
+      }
+
+    } catch (e) {
+      debugPrint("Lỗi xử lý tạo đơn tại ViewModel: $e");
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

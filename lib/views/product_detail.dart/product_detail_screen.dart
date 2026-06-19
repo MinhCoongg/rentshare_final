@@ -285,13 +285,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
                     ownerId: item.ownerId,
                     ownerAvatar: item.ownerAvatar,
                     ownerName: item.ownerName,
+                    ownerPhone: item.shopInfo?.receiverPhone ?? '0789617936',
                     pricePerDay: double.tryParse(item.pricePerDay) ?? 0.0,
                     title: item.title,
                     image: item.images.isNotEmpty ? item.images.first : '', 
                     quantity: 1, 
                     maxStock: item.quantity,
                     depositAmount: double.tryParse(item.depositAmount) ?? 0.0, 
-                    ownerAddress: item.location
+                    ownerAddress: item.location,
+                    tierPricings: item.tierPricings
                   );
                   final cartProvider = context.read<RentalCartProvider>();
                   String result = await cartProvider.addToCart(newItem);
@@ -301,7 +303,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
                       context: context, 
                       title: "Thông báo khác Shop", 
                       content: "Bạn đang có sản phẩm từ Shop khác trong đơn thuê. Bạn có muốn xóa giỏ hiện tại và thuê sản phẩm mới này không?",
-                      actionButtonText: "Xóa giỏ và thêm '${item.title}'", 
+                      actionButtonText: "Xóa giỏ và thêm", 
                     );
                     if (shouldClearCart) {
                       await cartProvider.clearAndAddNewProduct(newItem);
