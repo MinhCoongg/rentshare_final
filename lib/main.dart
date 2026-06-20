@@ -5,12 +5,13 @@ import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/home_viewmodel.dart'; 
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/product_detail_viewmodel.dart';
-import 'package:rentshare_app/viewmodels/rentalOrderDetail_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/views/home_product/homeProduct.dart';
 import 'package:rentshare_app/views/login/login.dart';
 import 'package:rentshare_app/views/myorder/myorder.dart';
+import 'package:rentshare_app/views/owner/list_rental_product_screen.dart';
+import 'package:rentshare_app/views/owner/owner_rental_management_screen.dart';
 import 'package:rentshare_app/views/post_product.dart/post_product_screen.dart';
 import 'package:rentshare_app/views/product_detail.dart/product_detail_screen.dart';
 import 'package:rentshare_app/views/rentalOrderDetail/rentelDetalProduct.dart';
@@ -26,7 +27,6 @@ void main() {
         ChangeNotifierProvider(create: (_) => CheckoutViewModel()),
         ChangeNotifierProvider(create: (_) => AddressViewModel()),
         ChangeNotifierProvider(create: (_) => RentalOrderViewModel()),
-        ChangeNotifierProvider(create: (_) => RentalOrderDetailViewModel()),
 
       ],
       child: const MainApp(),
@@ -50,6 +50,7 @@ class MainApp extends StatelessWidget {
         '/post_product': (context) => const PostProductScreen(), 
         '/product_detail' : (context) => const ProductDetailPage(productId: 4),
         '/my-order' : (context) => const MyRentalsScreen(),
+        '/owner-orders-list': (context) => const OwnerRentalListScreen(),
 
       },
       onGenerateRoute: (RouteSettings settings) {
@@ -60,6 +61,14 @@ class MainApp extends StatelessWidget {
             builder: (context) => OrderDetailScreen(
               orderId: orderId,
             ),
+          );
+        }
+
+        if (settings.name == '/owner-filter') {
+          final int requestId = settings.arguments != null ? settings.arguments as int : 1003; 
+          
+          return MaterialPageRoute(
+            builder: (context) => OwnerRentalManagementScreen(rentalRequestId: requestId),
           );
         }
        

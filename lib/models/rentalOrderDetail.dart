@@ -10,6 +10,7 @@ class RentalOrderDetailModel {
   final String receiverName;
   final String receiverPhone;
   final String fullAddress;
+  final String? notes; 
   final String rentalFee;
   final String depositFee;
   final String shippingFee;
@@ -30,6 +31,7 @@ class RentalOrderDetailModel {
     required this.shippingMethod,
     required this.receiverName,
     required this.receiverPhone,
+    required this.notes,
     required this.fullAddress,
     required this.rentalFee,
     required this.depositFee,
@@ -53,6 +55,7 @@ class RentalOrderDetailModel {
       shippingMethod: json['shippingMethod'] ?? '',
       receiverName: json['receiverName'] ?? '',
       receiverPhone: json['receiverPhone'] ?? '',
+      notes: json['notes'] ?? json['cancelReason'] ?? 'Không có ghi chú.',
       fullAddress: json['fullAddress'] ?? '',
       rentalFee: json['rentalFee'] ?? '0.00',
       depositFee: json['depositFee'] ?? '0.00',

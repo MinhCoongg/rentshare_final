@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
-import 'package:rentshare_app/viewmodels/rentalOrderDetail_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/views/rentalOrderDetail/widget/info_text_row.dart';
+import 'package:rentshare_app/views/rentalOrderDetail/widget/section_container.dart';
 import 'package:rentshare_app/views/rentalOrderDetail/widget/time_line_step.dart';
 
 class OrderDetailScreen extends StatefulWidget {
@@ -19,7 +21,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RentalOrderDetailViewModel>().loadOrderDetail(widget.orderId);
+      context.read<RentalOrderViewModel>().loadOrderDetailFull(widget.orderId);
     });
   }
 
@@ -54,7 +56,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           )
         ],
       ),
-      body: Consumer<RentalOrderDetailViewModel>(
+      body: Consumer<RentalOrderViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
             return const Center(child: CircularProgressIndicator(color: primaryColor));
@@ -66,7 +68,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             );
           }
 
-          final order = viewModel.orderDetail;
+          final order = viewModel.currentOrder;
           if (order == null) return const Center(child: Text("Không có dữ liệu đơn thuê này!"));
 
           String statusText = "Chờ duyệt";
@@ -281,8 +283,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ],
                       ),
                     ),
-
-                    _buildSectionContainer(
+                    SectionContainer(
                       title: "Lịch sử đơn hàng",
                       icon: Icons.history,
                       primaryColor: primaryColor,
@@ -291,11 +292,27 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TimelineStep(label: "Đặt đơn", time: order.orderDate, isCompleted: true),
-                            TimelineStep(label: "Chờ duyệt", isCompleted: order.status != 'Pending'),
-                            TimelineStep(label: "Đang giao", isCompleted: ['Shipping', 'Delivered', 'Completed'].contains(order.status)),
-                            TimelineStep(label: "Đã thuê", isCompleted: ['Delivered', 'Completed'].contains(order.status)),
-                            TimelineStep(label: "Hoàn tất", isCompleted: order.status == 'Completed'),
+                            TimelineStep(
+                              label: "Đặt đơn", 
+                              time: order.orderDate, 
+                              isCompleted: true
+                            ),
+                            TimelineStep(
+                              label: "Chờ duyệt", 
+                              isCompleted: ['Approved', 'Shipping', 'Delivered', 'Completed'].contains(order.status)
+                            ),
+                            TimelineStep(
+                              label: "Đang giao", 
+                              isCompleted: ['Shipping', 'Delivered', 'Completed'].contains(order.status)
+                            ),
+                            TimelineStep(
+                              label: "Đã thuê", 
+                              isCompleted: ['Delivered', 'Completed'].contains(order.status)
+                            ),
+                            TimelineStep(
+                              label: "Hoàn tất", 
+                              isCompleted: order.status == 'Completed'
+                            ),
                           ],
                         ),
                       ),
@@ -338,7 +355,32 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               elevation: 0,
                             ),
-                            onPressed: order.status == 'Pending' ? () {} : null, // Chỉ cho hủy đơn khi ở trạng thái Chờ duyệt
+                            onPressed: order.status == 'Pending' ? () async {
+                            final bool isConfirm = await DifferentShopDialog.show(
+                              context: context,
+                              title: "Xác nhận hủy đơn",
+                              content: "Bạn có chắc chắn muốn hủy đơn thuê này không? Tiền cọc giữ đồ sẽ được hoàn 100% về ví của bạn lập tức.",
+                              actionButtonText: "Hủy đơn ngay", 
+                            );
+                            if (isConfirm && context.mounted) {
+                              final result = await context.read<RentalOrderViewModel>().cancelOrder(order.id);
+                              
+                              if (context.mounted) {
+                                if (result['success'] == true) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result['message'] ?? "Đã hủy đơn và hoàn cọc thành công!"),
+                                    backgroundColor: Color(0xff1B8A4B),),
+                                    
+                                  );
+                                  context.read<RentalOrderViewModel>().loadOrderDetailFull(order.id);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result['message']), backgroundColor: Colors.red),
+                                  );
+                                }
+                              }
+                            }
+                          } : null, // Nếu đơn hàng không phải 'Pending' 
                             icon: const Icon(Icons.cancel_presentation_outlined, size: 16, color: Colors.white),
                             label: const Text("Hủy đơn thuê", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                           ),

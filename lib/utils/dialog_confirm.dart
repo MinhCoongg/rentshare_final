@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class DifferentShopDialog extends StatelessWidget {
   final String title;
   final String content;
-  final String actionButtonText; // 🎯 BƠM THÊM BIẾN CHỮ CHO NÚT BẤM ĐỘNG NÀY NÍ!
+  final String actionButtonText; 
 
   const DifferentShopDialog({
     super.key, 
