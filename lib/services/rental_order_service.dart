@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rentshare_app/constant/constant_url.dart';
@@ -194,6 +195,32 @@ class RentalOrderService {
       return [];
     } catch (e) {
       return [];
+    }
+  }
+
+  Future<bool> renterRequestReturn(int orderId, File imageFile, String tracking, String note) async {
+    try {
+      final token = await SharedPrefsUtils.getToken();
+      
+      var request = http.MultipartRequest('POST', Uri.parse('${ConstantURL.baseUrl}/rental/renter-return'));
+      
+      request.headers.addAll({'Authorization': 'Bearer $token'});
+      
+      // Đẩy các thông tin text vào request.fields
+      request.fields['rentalRequestId'] = orderId.toString();
+      request.fields['trackingNumber'] = tracking;
+      request.fields['note'] = note;
+      
+      // Đẩy file ảnh vào request.files
+      request.files.add(await http.MultipartFile.fromPath('returnProof', imageFile.path));
+      
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("Lỗi upload: $e");
+      return false;
     }
   }
 }

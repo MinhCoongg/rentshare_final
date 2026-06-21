@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
+import 'package:rentshare_app/views/rentalOrderDetail/widget/actionBtn.dart';
 import 'package:rentshare_app/views/rentalOrderDetail/widget/info_text_row.dart';
 import 'package:rentshare_app/views/rentalOrderDetail/widget/section_container.dart';
 import 'package:rentshare_app/views/rentalOrderDetail/widget/time_line_step.dart';
@@ -71,14 +71,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           final order = viewModel.currentOrder;
           if (order == null) return const Center(child: Text("Không có dữ liệu đơn thuê này!"));
 
-          String statusText = "Chờ duyệt";
-          Color statusColor = Colors.orange[700]!;
-          if (order.status == 'Approved') { statusText = "Đã duyệt"; statusColor = Colors.blue; }
-          if (order.status == 'Shipping') { statusText = "Đang giao"; statusColor = Colors.teal; }
-          if (order.status == 'Delivered') { statusText = "Đang thuê"; statusColor = primaryColor; }
-          if (order.status == 'Completed') { statusText = "Đã hoàn tất"; statusColor = Colors.green; }
-          if (order.status == 'Cancelled') { statusText = "Đã hủy"; statusColor = Colors.red; }
+         
+          String statusText = order.status; 
+          Color statusColor = Colors.black87;
 
+          if (order.status == 'Pending') { statusText = "Chờ duyệt"; statusColor = Colors.orange[700]!; }
+          else if (order.status == 'Approved') { statusText = "Đã duyệt"; statusColor = Colors.blue; }
+          else if (order.status == 'Shipping') { statusText = "Đang giao"; statusColor = Colors.teal; }
+          else if (order.status == 'Delivered') { statusText = "Đang thuê"; statusColor = primaryColor; }
+          else if (order.status == 'Returned') { statusText = "Chờ trả hàng"; statusColor = Colors.purple; } 
+          else if (order.status == 'Completed') { statusText = "Đã hoàn tất"; statusColor = Colors.green; }
+          else if (order.status == 'Cancelled') { statusText = "Đã hủy"; statusColor = Colors.red; }
           return Stack(
             children: [
               SingleChildScrollView(
@@ -124,7 +127,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ),
 
-                    _buildSectionContainer(
+                    SectionContainer(
                       title: "Thông tin đơn hàng",
                       icon: Icons.assignment_outlined,
                       primaryColor: primaryColor,
@@ -154,7 +157,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ),
 
-                    _buildSectionContainer(
+                    SectionContainer(
                       title: "Danh sách sản phẩm",
                       icon: Icons.shopping_bag_outlined,
                       primaryColor: primaryColor,
@@ -199,9 +202,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                         children: [
                                           const Icon(Icons.calendar_month_outlined, color: Colors.grey, size: 12),
                                           const SizedBox(width: 4),
-                                          Text(
-                                            "${order.startDateFormatted} - ${order.endDateFormatted} (${order.rentalDays} ngày)",
-                                            style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                                          Expanded( 
+                                            child: Text(
+                                              "${order.startDateFormatted} - ${order.endDateFormatted} (${order.rentalDays} ngày)",
+                                              style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                                              overflow: TextOverflow.ellipsis, 
+                                              maxLines: 1, 
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -216,7 +223,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ),
 
-                    _buildSectionContainer(
+                    SectionContainer(
                       title: "Thông tin nhận sản phẩm",
                       icon: Icons.local_shipping_outlined,
                       primaryColor: primaryColor,
@@ -237,7 +244,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ),
 
-                    _buildSectionContainer(
+                    SectionContainer(
                       title: "Chi tiết thanh toán",
                       icon: Icons.credit_card_outlined,
                       primaryColor: primaryColor,
@@ -292,26 +299,47 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TimelineStep(
-                              label: "Đặt đơn", 
-                              time: order.orderDate, 
-                              isCompleted: true
+                            // 1. Đặt đơn
+                            Expanded(
+                              child: TimelineStep(
+                                label: "Đặt đơn",
+                                isCompleted: true,
+                              ),
                             ),
-                            TimelineStep(
-                              label: "Chờ duyệt", 
-                              isCompleted: ['Approved', 'Shipping', 'Delivered', 'Completed'].contains(order.status)
+                            // 2. Chờ duyệt
+                            Expanded(
+                              child: TimelineStep(
+                                label: "Chờ duyệt",
+                                isCompleted: ['Approved', 'Shipping', 'Delivered', 'Returned', 'Completed'].contains(order.status),
+                              ),
                             ),
-                            TimelineStep(
-                              label: "Đang giao", 
-                              isCompleted: ['Shipping', 'Delivered', 'Completed'].contains(order.status)
+                            // 3. Đang giao
+                            Expanded(
+                              child: TimelineStep(
+                                label: "Đang giao",
+                                isCompleted: ['Shipping', 'Delivered', 'Returned', 'Completed'].contains(order.status),
+                              ),
                             ),
-                            TimelineStep(
-                              label: "Đã thuê", 
-                              isCompleted: ['Delivered', 'Completed'].contains(order.status)
+                            // 4. Đã thuê
+                            Expanded(
+                              child: TimelineStep(
+                                label: "Đã thuê",
+                                isCompleted: ['Delivered', 'Returned', 'Completed'].contains(order.status),
+                              ),
                             ),
-                            TimelineStep(
-                              label: "Hoàn tất", 
-                              isCompleted: order.status == 'Completed'
+                            // 5. Chờ trả
+                            Expanded(
+                              child: TimelineStep(
+                                label: "Chờ trả",
+                                isCompleted: ['Returned', 'Completed'].contains(order.status),
+                              ),
+                            ),
+                            // 6. Hoàn tất
+                            Expanded(
+                              child: TimelineStep(
+                                label: "Hoàn tất",
+                                isCompleted: order.status == 'Completed',
+                              ),
                             ),
                           ],
                         ),
@@ -342,48 +370,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                               side: BorderSide(color: Colors.grey[300]!),
                             ),
-                            onPressed: () {},
+                            onPressed: () {}, // Logic chat
                             child: const Text("Liên hệ shop", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFE07A5F),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              elevation: 0,
-                            ),
-                            onPressed: order.status == 'Pending' ? () async {
-                            final bool isConfirm = await DifferentShopDialog.show(
-                              context: context,
-                              title: "Xác nhận hủy đơn",
-                              content: "Bạn có chắc chắn muốn hủy đơn thuê này không? Tiền cọc giữ đồ sẽ được hoàn 100% về ví của bạn lập tức.",
-                              actionButtonText: "Hủy đơn ngay", 
-                            );
-                            if (isConfirm && context.mounted) {
-                              final result = await context.read<RentalOrderViewModel>().cancelOrder(order.id);
-                              
-                              if (context.mounted) {
-                                if (result['success'] == true) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(result['message'] ?? "Đã hủy đơn và hoàn cọc thành công!"),
-                                    backgroundColor: Color(0xff1B8A4B),),
-                                    
-                                  );
-                                  context.read<RentalOrderViewModel>().loadOrderDetailFull(order.id);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(result['message']), backgroundColor: Colors.red),
-                                  );
-                                }
-                              }
-                            }
-                          } : null, // Nếu đơn hàng không phải 'Pending' 
-                            icon: const Icon(Icons.cancel_presentation_outlined, size: 16, color: Colors.white),
-                            label: const Text("Hủy đơn thuê", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ),
+                          child: RenterActionButton(order : order, primaryColor: primaryColor),
                         ),
                       ],
                     ),
@@ -393,37 +386,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-
-
-  Widget _buildSectionContainer({required String title, required IconData icon, required Color primaryColor, required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: primaryColor),
-              const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black)),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Divider(height: 1, thickness: 0.5, color: Color(0xFFF3F4F6)),
-          ),
-          child,
-        ],
       ),
     );
   }

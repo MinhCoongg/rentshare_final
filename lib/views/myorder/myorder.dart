@@ -17,6 +17,7 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
     {'title': 'Chờ duyệt', 'status': 'Pending'},
     {'title': 'Đang giao', 'status': 'Shipping'},
     {'title': 'Đang thuê', 'status': 'Delivered'}, 
+    {'title': 'Chờ trả', 'status': 'Returned'}, 
     {'title': 'Đã hoàn tất', 'status': 'Completed'},
     {'title': 'Đã hủy', 'status': 'Cancelled'},
   ];

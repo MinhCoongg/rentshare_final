@@ -166,7 +166,7 @@ class _LoginViewState extends State<LoginView> {
                                           );
                                           
                                          
-                                          Navigator.pushReplacementNamed(context, '/home');
+                                          Navigator.pushReplacementNamed(context, '/my-order');
                                           
                                         } else {
                                           ScaffoldMessenger.of(context).showSnackBar(

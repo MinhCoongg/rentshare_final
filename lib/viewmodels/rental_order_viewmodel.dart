@@ -1,7 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:rentshare_app/constant/constant_url.dart';
 import 'package:rentshare_app/models/rentalOrderDetail.dart';
 import 'package:rentshare_app/models/rentalOrderItem.dart'; // Đảm bảo chứa lớp RentalOrderModel danh sách đơn của ní
 import 'package:rentshare_app/services/rental_order_service.dart';
+import 'package:rentshare_app/utils/sharetoken_utils.dart';
 
 class RentalOrderViewModel extends ChangeNotifier {
   final RentalOrderService _orderService = RentalOrderService();
@@ -146,4 +153,21 @@ List<RentalOrderModel> _ownerOrders = [];
       notifyListeners(); 
     }
   }
+
+  
+  Future<Map<String, dynamic>> submitReturnFromRenter(int orderId, File imageFile, String tracking, String note) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      // 🚀 Truyền trực tiếp File ảnh xuống Service, không cần gọi uploadReturnProof nữa
+      final success = await _orderService.renterRequestReturn(orderId, imageFile, tracking, note);
+      return {'success': success};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
 }
