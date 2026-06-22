@@ -58,7 +58,7 @@ class RentalOrderModel {
   final double totalAmount;
   final String? cancelReason;      
   final String? ownerName;         
-  final String? ownerAvatar;        
+  final String? ownerAvatar;     
   final List<RentalOrderItemModel> items;
 
   RentalOrderModel({
@@ -108,6 +108,7 @@ class RentalOrderModel {
       cancelReason: json["cancelReason"],
       ownerName: json["ownerName"],
       ownerAvatar: json["ownerAvatar"],
+      
       items: (json["items"] as List? ?? [])
           .map((e) => RentalOrderItemModel.fromJson(e))
           .toList(),

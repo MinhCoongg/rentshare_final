@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rentshare_app/constant/constant_url.dart';
+import 'package:rentshare_app/models/damageReport.dart';
+import 'package:rentshare_app/models/policy_model.dart';
 import 'package:rentshare_app/models/rentalOrderDetail.dart';
 import 'package:rentshare_app/models/rentalOrderItem.dart';
 import 'package:rentshare_app/utils/sharetoken_utils.dart';
@@ -221,6 +223,84 @@ class RentalOrderService {
     } catch (e) {
       debugPrint("Lỗi upload: $e");
       return false;
+    }
+  }
+
+    Future<Map<String, dynamic>> reportDamage(
+      int rentalRequestId, String note, double compensation, File? imageFile) async {
+    
+    final url = Uri.parse('${ConstantURL.baseUrl}/rental/report-damage');
+    debugPrint("--- BẮT ĐẦU GỬI BÁO CÁO HƯ HỎNG ---");
+    debugPrint("URL: $url");
+    debugPrint("Data: ID=$rentalRequestId, Note=$note, Fee=$compensation");
+    final String token = await SharedPrefsUtils.getToken();
+    var request = http.MultipartRequest('POST', url);
+    request.headers['Authorization'] = 'Bearer $token';
+    request.fields['rentalRequestId'] = rentalRequestId.toString();
+    request.fields['note'] = note;
+    request.fields['compensation'] = compensation.toString();
+    
+    if (imageFile != null) {
+      debugPrint("Có file ảnh: ${imageFile.path}");
+      request.files.add(await http.MultipartFile.fromPath('proof', imageFile.path));
+    } else {
+      debugPrint("Không có file ảnh đính kèm!");
+    }
+
+    try {
+      var response = await request.send();
+      debugPrint("Server phản hồi (Status Code): ${response.statusCode}");
+      
+      var responseData = await response.stream.bytesToString();
+      debugPrint("Server phản hồi (Body): $responseData");
+      
+      return json.decode(responseData);
+    } catch (e) {
+      debugPrint("LỖI KHI GỬI HTTP REQUEST: $e");
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<List<PolicyModel>> fetchPolicies(int productId) async {
+    try {
+      final response = await http.get(Uri.parse('${ConstantURL.baseUrl}/rental/policy/$productId'));
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      
+      if (responseData['success'] == true) {
+        final List<dynamic> data = responseData['data'];
+        return data.map((json) => PolicyModel.fromJson(json)).toList();
+      }
+    } catch (e) {
+      debugPrint("Lỗi khi fetch policies: $e");
+    }
+    return []; 
+  }
+
+  Future<DamageReport> getDamageReport(int rentalRequestId) async {
+    try {
+      final String token = await SharedPrefsUtils.getToken();
+      final String url = '${ConstantURL.baseUrl}/rental/report-damage/$rentalRequestId';
+      
+      final response = await http.get(
+        Uri.parse(url), 
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json"
+        }
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> resData = jsonDecode(response.body);
+        if (resData['success'] == true) {
+          return DamageReport.fromJson(resData['data']);
+        } else {
+          throw Exception(resData['message'] ?? "Lỗi không xác định");
+        }
+      } else {
+        throw Exception("Lỗi server: ${response.statusCode}");
+      }
+    } catch (e) {
+      throw Exception("Lỗi kết nối: $e");
     }
   }
 }

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
+import 'package:rentshare_app/views/checkRentalProduct/report_back_owner.dart';
+import 'package:rentshare_app/views/owner/widget/returned_product.dart';
 
 class OwnerRentalManagementScreen extends StatefulWidget {
   final int rentalRequestId;
@@ -35,17 +37,18 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
     return "${FormatUtils.formatMoney(amount)}đ";
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Pending': return Colors.orange;
-      case 'Approved': return Colors.teal;
-      case 'Shipping': return Colors.blue;
-      case 'Delivered': return Colors.green;
-      case 'Returned': return const Color(0xFF7B1FA2);
-      case 'Completed': return Colors.grey;
-      default: return Colors.black54;
-    }
+ Color _getStatusColor(String status) {
+  switch (status) {
+    case 'Pending': return Colors.orange;
+    case 'Approved': return Colors.teal;
+    case 'Shipping': return Colors.blue;
+    case 'Delivered': return Colors.green;
+    case 'Returned': return const Color(0xFF7B1FA2);
+    case 'Inspecting': return Colors.deepPurpleAccent;
+    case 'Completed': return Colors.grey;
+    default: return Colors.black54;
   }
+}
 
   String _getStatusTextText(String status) {
     switch (status) {
@@ -54,6 +57,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
       case 'Shipping': return 'Đang giao';
       case 'Delivered': return 'Đang thuê';
       case 'Returned': return 'Chờ trả hàng';
+      case 'Inspecting': return 'Đang nghiệm thu';
       case 'Completed': return 'Hoàn tất';
       default: return status;
     }
@@ -61,8 +65,8 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
 
 
   Widget _buildOrderStepper(String currentStatus) {
-    List<String> statuses = ['Pending', 'Approved', 'Shipping', 'Delivered', 'Completed'];
-    List<String> labels = ['Đã đặt', 'Đã duyệt', 'Đang giao', 'Đang thuê', 'Hoàn tất'];
+    List<String> statuses = ['Pending', 'Approved', 'Shipping', 'Delivered', 'Inspecting', 'Completed'];
+    List<String> labels = ['Đã đặt', 'Đã duyệt', 'Đang giao', 'Đang thuê', 'Nghiệm thu', 'Hoàn tất'];
     
     int currentIndex = statuses.indexOf(currentStatus);
     if (currentStatus == 'Returned') currentIndex = 3; 
@@ -95,7 +99,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                       style: TextStyle(
                         fontSize: 10, 
                         fontWeight: isPassed ? FontWeight.bold : FontWeight.normal, 
-                        color: index == 3 && currentStatus == 'Returned' ? Colors.orange : (isPassed ? Colors.black87 : Colors.grey)
+                        //color: index == 3 && currentStatus == 'Returned' ? Colors.orange : (isPassed ? Colors.black87 : Colors.grey)
                       )
                     ),
                   ],
@@ -112,26 +116,20 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
     );
   }
 
-  // ✨ HÀM VẼ BANNER NHẮC NHỞ DÀNH RIÊNG CHO MÀN HÌNH 3 VÀ MÀN HÌNH 4 FIGMA
-  // ✅ SỬA 1: Truyền thêm biến order vào hàm để lấy dữ liệu thời gian thật từ database
   Widget _buildTopContextBanner(String status, dynamic order) {
     if (status == 'Delivered') {
-      // ⏱️ Logic tính toán số ngày còn lại (Dynamic)
       int dynamicRemainingDays = 0;
       String deadlineText = "Chưa xác định";
 
       try {
-        // Giả định backend của ní trả về định dạng ngày chuỗi: "DD/MM/YYYY" (Ví dụ: "21/06/2026")
         List<String> parts = (order.endDateFormatted ?? "").toString().split('/');
         if (parts.length == 3) {
           int day = int.parse(parts[0]);
           int month = int.parse(parts[1]);
           int year = int.parse(parts[2]);
           
-          DateTime endDateTime = DateTime(year, month, day, 23, 59); // Mốc cuối ngày trả đồ
-          DateTime now = DateTime.now(); // Ngày hôm nay ngoài đời thực
-
-          // Tính toán số ngày chênh lệch giữa ngày kết thúc và hôm nay
+          DateTime endDateTime = DateTime(year, month, day, 23, 59); 
+          DateTime now = DateTime.now(); 
           dynamicRemainingDays = endDateTime.difference(now).inDays;
           deadlineText = "${order.endDateFormatted} - 23:59";
         }
@@ -139,7 +137,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
         debugPrint("Lỗi parse ngày tháng dynamic: $e");
       }
 
-      // Chuốt lại chuỗi hiển thị số ngày còn lại cho khoa học
       String remainingText = dynamicRemainingDays > 0 
           ? "Còn $dynamicRemainingDays ngày" 
           : (dynamicRemainingDays == 0 ? "Hôm nay hạn trả!" : "Quá hạn ${dynamicRemainingDays.abs()} ngày ⚠️");
@@ -149,7 +146,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(color: const Color(0xFFF3E5F5), borderRadius: BorderRadius.circular(12)),
-        // Bỏ chữ "const" ở Column đi vì data bây giờ là dynamic
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -161,9 +157,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
               ],
             ),
             const SizedBox(height: 4),
-            // ✅ Đổ data số ngày thuê dynamic chạy tự động vào đây
             Text(remainingText, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF7B1FA2))),
-            // ✅ Đổ ngày hạn trả thực tế lấy từ database vào đây
             Text("Trả trước: $deadlineText", style: const TextStyle(fontSize: 11, color: Colors.black54)),
           ],
         ),
@@ -194,14 +188,26 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
       );
     }
 
+    if (order.status == 'Inspecting') {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        color: Colors.orange.withOpacity(0.1),
+        child: Row(
+          children: [
+            const Icon(Icons.pending_actions, color: Colors.orange),
+            const SizedBox(width: 8),
+            const Text("Đang chờ khách xác nhận nghiệm thu", 
+              style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
+    }
+
     return const SizedBox.shrink();
   }
 
-  // ✨ HÀM SINH THANH ĐIỀU KHIỂN NÚT BẤM BIẾN ĐỔI CHUẨN CHỈ HẾT MÂU THUẪN
   Widget _buildBottomActionBar(dynamic order, Color primaryColor) {
     if (order.status == 'Completed' || order.status == 'Cancelled') return const SizedBox.shrink();
-
-    // Bước 1: Chờ duyệt -> Nút Từ chối / Duyệt
     if (order.status == 'Pending') {
       return Row(
         children: [
@@ -209,7 +215,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(foregroundColor: Colors.red, side: const BorderSide(color: Colors.red), padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
               onPressed: () => _handleRejectOrder(context, order),
-              child: const Text("✕ Từ chối đơn", style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text("Từ chối đơn", style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(width: 12),
@@ -217,26 +223,23 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
               onPressed: () => _handleApproveOrder(context, order),
-              child: const Text("✓ Duyệt đơn", style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text("Duyệt đơn", style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
       );
     } 
     
-    // Bước 2: Đang giao -> Chờ vận chuyển
     if (order.status == 'Shipping') {
       return SizedBox(
         width: double.infinity,
         child: OutlinedButton(
           style: OutlinedButton.styleFrom(side: BorderSide(color: primaryColor), padding: const EdgeInsets.symmetric(vertical: 14)),
           onPressed: () {},
-          child: Text("🚚 Đơn hàng đang trên đường đi giao...", style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+          child: Text("Đơn hàng đang trên đường đi giao...", style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
         ),
       );
     }
-
-    // Bước 3: ĐANG THUÊ (Hình 3) -> Hiện nút trắng viền xanh kêu bấm TRẢ HÀNG
     if (order.status == 'Delivered') {
       return SizedBox(
         width: double.infinity,
@@ -246,14 +249,12 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          // Bấm phát nhảy sang trạng thái Returning (Chờ trả) giả lập y xì đúc luồng Figma
-          onPressed: () => _handleSimulateReturnAction(context, order),
+          onPressed: (){},
           child: Text("Khách đã trả hàng", style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13)),
         ),
       );
     }
 
-    // Bước 4: CHỜ TRẢ HÀNG (Hình 4) -> Hiện nút TÍM ĐẬM bốc Form nghiệm thu kịch trần!
     if (order.status == 'Returned') {
       return SizedBox(
         width: double.infinity,
@@ -264,7 +265,12 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             elevation: 0,
           ),
-          onPressed: () => _handleOpenNghiemThuDialog(context, order),
+          onPressed: () async {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => NghiemThuProductScreen(order: order)),
+            );
+          },
           child: const Text("Xác nhận đã nhận hàng", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
         ),
       );
@@ -308,13 +314,12 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ⚡ Thanh tiến trình Stepper động 5 bước
                     _buildOrderStepper(order.status),
 
-                    // ⚡ ĐẮP BANNER TRONG HÌNH 3 & HÌNH 4 CHUẨN CỐP FIGMA
                     _buildTopContextBanner(order.status, order),
 
-                    // Tag trạng thái đơn bo cạnh mịn màng
+                    ReturnVerificationSection(order: order),
+
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(color: currentStatusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
@@ -328,7 +333,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                     Text("Đặt lúc: ${order.orderDate}", style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                     const SizedBox(height: 16),
 
-                    // 👤 Thông tin khách hàng
                     _buildCardWrapper(
                       title: "Thông tin khách hàng",
                       child: Row(
@@ -359,7 +363,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                       ),
                     ),
 
-                    // 📅 Chi tiết lịch trình & hình thức nhận
                     _buildCardWrapper(
                       title: "Thông tin đơn thuê",
                       child: Column(
@@ -375,7 +378,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                       ),
                     ),
 
-                    // ⛺ Danh sách sản phẩm
                     _buildCardWrapper(
                       title: "Sản phẩm thuê",
                       child: Column(
@@ -409,7 +411,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                                 )
                               ],
                             ),
-                          )).toList(),
+                          )),
                           const Divider(height: 20, thickness: 0.8),
                           _buildAmountRow("Tạm tính (tiền thuê)", _format(order.rentalFee)),
                           _buildAmountRow("Phí giao hàng", _format(order.shippingFee)),
@@ -429,8 +431,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                   ],
                 ),
               ),
-
-              // 🕹️ Ghim thanh điều khiển dynamic dưới đáy màn hình
               Positioned(
                 left: 0, right: 0, bottom: 0,
                 child: Container(
@@ -448,15 +448,8 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
     );
   }
 
-  // =========================================================================
-  // 🔄 HÀM GIẢ LẬP CHUYỂN TỪ BƯỚC THUÊ SANG LUỒNG BÁO TRẢ HÀNG ĂN TIỀN
-  // =========================================================================
-  void _handleSimulateReturnAction(BuildContext context, dynamic order) {
-    setState(() {
-      order.status = 'Returned'; // Ép cục bộ sang trạng thái Chờ trả hàng y xì đúc Figma
-    });
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Hệ thống ghi nhận Khách đã bấm nút gửi trả sản phẩm ngoài đời thực! 🎉")));
-  }
+  
+  
 
   void _handleRejectOrder(BuildContext context, dynamic order) async {
     final bool isConfirm = await DifferentShopDialog.show(
@@ -485,67 +478,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Duyệt đơn hàng thành công! Hóa đơn Invoice đã được khởi tạo.")));
       Navigator.pop(context);
     }
-  }
-
-  // 🔥 4. FORM HỘP THOẠI POPUP NGHIỆM THU TRẢ ĐỒ ĂN TIỀN CỦA NÍ CÔNG
-  void _handleOpenNghiemThuDialog(BuildContext context, dynamic order) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Nghiệm thu trả sản phẩm", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text("Vui lòng kiểm tra kỹ số lượng và tình trạng sản phẩm thuê khi nhận lại từ khách hàng.", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-              const Divider(height: 24),
-              
-              const Text("Tình trạng chung", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: 'Good',
-                decoration: InputDecoration(contentPadding: const EdgeInsets.symmetric(horizontal: 12), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
-                items: const [
-                  DropdownMenuItem(value: 'Good', child: Text("Tốt - Không vấn đề (Hoàn 100% cọc)")),
-                  DropdownMenuItem(value: 'Damaged', child: Text("Hư hỏng/Trầy xước (Trừ tiền cọc)")),
-                ],
-                onChanged: (val) {},
-              ),
-              const SizedBox(height: 16),
-              
-              const Text("Ghi chú nghiệm thu (nếu có)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _reasonController,
-                decoration: InputDecoration(hintText: "Nhập tình trạng chi tiết hoặc phí phát sinh...", hintStyle: const TextStyle(fontSize: 12), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 24),
-              
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(this.context).showSnackBar(const SnackBar(content: Text("Nghiệm thu thành công! Đơn hàng đã hoàn tất tất toán 🎉")));
-                    Navigator.pop(this.context);
-                  },
-                  child: const Text("Xác nhận hoàn tất đơn thuê", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   Widget _buildCardWrapper({required String title, required Widget child}) {

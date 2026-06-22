@@ -1,14 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-import 'package:rentshare_app/constant/constant_url.dart';
+import 'package:rentshare_app/models/damageReport.dart';
+import 'package:rentshare_app/models/policy_model.dart';
 import 'package:rentshare_app/models/rentalOrderDetail.dart';
-import 'package:rentshare_app/models/rentalOrderItem.dart'; // Đảm bảo chứa lớp RentalOrderModel danh sách đơn của ní
+import 'package:rentshare_app/models/rentalOrderItem.dart'; 
 import 'package:rentshare_app/services/rental_order_service.dart';
-import 'package:rentshare_app/utils/sharetoken_utils.dart';
+
 
 class RentalOrderViewModel extends ChangeNotifier {
   final RentalOrderService _orderService = RentalOrderService();
@@ -16,16 +13,16 @@ class RentalOrderViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String _errorMessage = '';
   List<RentalOrderModel> _myOrders = [];   
-List<RentalOrderModel> _ownerOrders = [];                     
+  List<RentalOrderModel> _ownerOrders = [];                     
   RentalOrderDetailModel? _currentOrder;              
-
+  DamageReport? _damageReport;
 
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
   List<RentalOrderModel> get myOrders => _myOrders;
   List<RentalOrderModel> get ownerOrders => _ownerOrders;
   RentalOrderDetailModel? get currentOrder => _currentOrder;
-
+  DamageReport? get damageReport => _damageReport;
 
  
   Future<void> loadMyOrders({String? status}) async {
@@ -167,6 +164,32 @@ List<RentalOrderModel> _ownerOrders = [];
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<List<PolicyModel>> fetchPolicies(int productId) async {
+    return await _orderService.fetchPolicies(productId);
+  }
+
+  Future<bool> sendDamageReport(int id, String note, double fee, File? img) async {
+    _isLoading = true; notifyListeners();
+    final result = await _orderService.reportDamage(id, note, fee, img);
+    _isLoading = false; notifyListeners();
+    return result['success'] == true;
+  }
+
+  Future<void> fetchDamageReport(int rentalRequestId) async {
+    _isLoading = true;
+    notifyListeners(); 
+
+    try {
+      _damageReport = await _orderService.getDamageReport(rentalRequestId);
+    } catch (e) {
+      _errorMessage = e.toString();
+      debugPrint("Lỗi ViewModel: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners(); 
     }
   }
 

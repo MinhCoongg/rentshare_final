@@ -16,7 +16,7 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchOrdersByTab(0);
     });
@@ -41,7 +41,8 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
       case 1: viewModel.loadOwnerOrders(status: 'Shipping'); break;
       case 2: viewModel.loadOwnerOrders(status: 'Delivered'); break;
       case 3: viewModel.loadOwnerOrders(status: 'Returned'); break;
-      case 4: viewModel.loadOwnerOrders(status: 'Completed'); break;
+      case 4: viewModel.loadOwnerOrders(status: 'Inspecting'); break;
+      case 5: viewModel.loadOwnerOrders(status: 'Completed'); break;
     }
   }
 
@@ -51,11 +52,11 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
       case 1: return 'Shipping';
       case 2: return 'Delivered';
       case 3: return 'Returned';
+      case 4: return 'Inspecting';
       default: return 'Completed';
     }
   }
 
-  // 🔥 HÀM SINH BANNER NHẮC NHỞ Y XÌ FIGMA THEO TỪNG TAB
   Widget _buildAlertBanner(int tabIndex) {
     String text = "";
     Color bgColor = Colors.white;
@@ -74,7 +75,10 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
     } else if (tabIndex == 3) {
       text = "Khách đã báo trả hàng. Vui lòng xác nhận khi bạn nhận lại và kiểm tra sản phẩm.";
       bgColor = const Color(0xFFF3E5F5); textColor = const Color(0xFF7B1FA2); icon = Icons.assignment_return_outlined;
-    } else {
+    } else if (tabIndex == 4) { 
+      text = "Sản phẩm đang trong quá trình nghiệm thu. Vui lòng chờ khách xác nhận hoặc khiếu nại nếu quá 24h.";
+      bgColor = const Color(0xFFFFF3E0); textColor = const Color(0xFFEF6C00); icon = Icons.pending_actions;
+    }else {
       text = "Tổng đơn hoàn tất. Tiền thuê đã được giải ngân vào ví của bạn.";
       bgColor = const Color(0xFFE8F5E9); textColor = const Color(0xFF2E7D32); icon = Icons.check_circle_outline;
     }
@@ -107,7 +111,6 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         centerTitle: true,
-        // ✨ NÂNG CẤP TABBAR TINH TẾ BO GÓC NHỎ XỊN MỊN
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
@@ -119,10 +122,10 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
               indicatorColor: primaryColor,
               indicatorWeight: 3,
               isScrollable: true,
-              indicatorSize: TabBarIndicatorSize.label, // Gạch chân ngắn vừa bằng chữ y xì Figma
+              indicatorSize: TabBarIndicatorSize.label, 
               labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               tabs: const [
-                Tab(text: "Chờ duyệt"), Tab(text: "Đang giao"), Tab(text: "Đang thuê"), Tab(text: "Chờ trả"), Tab(text: "Hoàn tất"),
+                Tab(text: "Chờ duyệt"), Tab(text: "Đang giao"), Tab(text: "Đang thuê"), Tab(text: "Chờ trả"),Tab(text: "Nghiệm thu"), Tab(text: "Hoàn tất"),
               ],
             ),
           ),
@@ -215,103 +218,51 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
                             else if (order.status == 'Shipping') { displayStatus = 'Chờ giao'; tagBgColor = const Color(0xFFE8F0FE); tagTextColor = const Color(0xFF1A73E8); }
                             else if (order.status == 'Returned') { displayStatus = 'Chờ nhận hàng'; tagBgColor = const Color(0xFFF3E5F5); tagTextColor = const Color(0xFF7B1FA2); }
                             else if (order.status == 'Completed') { displayStatus = 'Hoàn tất'; tagBgColor = const Color(0xFFE8F5E9); tagTextColor = const Color(0xFF2E7D32); }
-
-                            return Container(
+                            else if (order.status == 'Inspecting') { displayStatus = 'Nghiệm thu'; tagBgColor = Colors.orange.withOpacity(0.1); tagTextColor = Colors.orange; }
+                            return Card(
+                              elevation: 0,
                               margin: const EdgeInsets.only(bottom: 14),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6, offset: const Offset(0, 2))],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: BorderSide(color: Colors.grey.withOpacity(0.1)),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Mã đơn và Tag trạng thái
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "ORD-${order.orderCode.replaceAll('#RS', '')}", // Định dạng chuỗi gọn gàng như Figma
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(color: tagBgColor, borderRadius: BorderRadius.circular(6)),
-                                        child: Text(displayStatus, style: TextStyle(color: tagTextColor, fontSize: 11, fontWeight: FontWeight.bold)),
-                                      ),
-                                    ],
-                                  ),
-                                  const Divider(height: 24, thickness: 0.5, color: Color(0xFFE5E7EB)),
-                                  
-                                  // Thông tin Khách thuê
-                                  Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 18,
-                                        backgroundColor: Colors.blueGrey[500]?.withOpacity(0.1),
-                                        child: Icon(Icons.person, size: 20, color: Colors.blueGrey[400]),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(order.receiverName, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87, fontSize: 13)),
-                                          const SizedBox(height: 2),
-                                          Text(order.receiverPhone ?? "0901234567", style: TextStyle(color: Colors.grey[500], fontSize: 11)),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-
-                                  // Lịch trình ngày thuê
-                                  Row(
-                                    children: [
-                                      Icon(Icons.calendar_month_outlined, size: 15, color: Colors.grey[400]),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        "${order.startDate} - ${order.endDate} (${order.rentalDays} ngày)",
-                                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  // Tổng tiền cọc/thuê
-                                  RichText(
-                                    text: TextSpan(
-                                      text: _tabController.index == 4 ? "Doanh thu: " : "Tiền cọc: ",
-                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Header
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        TextSpan(
-                                          text: "${FormatUtils.formatMoney(double.tryParse(order.totalAmount.toString()) ?? 0.0)}đ",
-                                          style: TextStyle(color: _tabController.index == 4 ? Colors.green : Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13),
-                                        ),
+                                        Text("ORD-${order.orderCode.replaceAll('#RS', '')}", 
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                        _buildStatusTag(displayStatus, tagBgColor, tagTextColor),
                                       ],
                                     ),
-                                  ),
-                                  
-                                  // 🚀 ĐẮP THÊM NÚT ĐÁY CARD CHUẨN ĐÉC FIGMA
-                                  const SizedBox(height: 14),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 38,
-                                    child: _tabController.index == 1 
-                                        ? ElevatedButton(
-                                            onPressed: () {},
-                                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE67E22), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), elevation: 0),
-                                            child: const Text("Đã giao cho đơn vị vận chuyển", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                                          )
-                                        : OutlinedButton(
-                                            onPressed: () {
-                                              Navigator.pushNamed(context, '/owner-filter', arguments: order.id);
-                                            },
-                                            style: OutlinedButton.styleFrom(side: const BorderSide(color: primaryColor), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                                            child: const Text("Xem chi tiết", style: TextStyle(color: primaryColor, fontSize: 12, fontWeight: FontWeight.bold)),
-                                          ),
-                                  ),
-                                ],
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 12),
+                                      child: Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
+                                    ),
+                                    
+                                    // Body info (Gọn gàng hơn)
+                                    _buildInfoRow(Icons.person_outline, "Khách:", order.receiverName),
+                                    const SizedBox(height: 8),
+                                    _buildInfoRow(Icons.calendar_today_outlined, "Thời gian:", "${order.startDate} - ${order.endDate}"),
+                                    
+                                    const Divider(height: 24, thickness: 1, color: Color(0xFFF3F4F6)),
+                                    
+                                    // Footer: Giá + Nút
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text("${_tabController.index == 4 ? "Doanh thu" : "Tiền cọc"}: ${FormatUtils.formatMoney(double.tryParse(order.totalAmount.toString()) ?? 0)}đ",
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
+                                        _buildActionButton(order), 
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -321,6 +272,43 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
             ],
           );
         },
+      ),
+    );
+  }
+
+  // 1. Vẽ cái Tag trạng thái
+  Widget _buildStatusTag(String label, Color bgColor, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
+      child: Text(label, style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  // 2. Vẽ dòng thông tin (Khách, Ngày thuê)
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: Colors.grey[400]),
+        const SizedBox(width: 8),
+        Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+        const SizedBox(width: 4),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+      ],
+    );
+  }
+
+  // 3. Vẽ nút bấm "Xem chi tiết"
+  Widget _buildActionButton(dynamic order) {
+    return SizedBox(
+      height: 32,
+      child: OutlinedButton(
+        onPressed: () => Navigator.pushNamed(context, '/owner-filter', arguments: order.id),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Color(0xFF00B4D8)), 
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
+        ),
+        child: const Text("Xem chi tiết", style: TextStyle(color: Color(0xFF00B4D8), fontSize: 11, fontWeight: FontWeight.bold)),
       ),
     );
   }

@@ -18,6 +18,9 @@ class RentalOrderDetailModel {
   final String? cancelReason;
   final String ownerName;
   final String ownerAvatar;
+  final String? returnProof;       
+  final String? trackingNumber;    
+  final String? note;   
   final List<OrderDetailItem> items;
 
   RentalOrderDetailModel({
@@ -40,6 +43,9 @@ class RentalOrderDetailModel {
     this.cancelReason,
     required this.ownerName,
     required this.ownerAvatar,
+    this.returnProof,
+    this.trackingNumber,
+    this.note,
     required this.items,
   });
 
@@ -64,6 +70,9 @@ class RentalOrderDetailModel {
       cancelReason: json['cancelReason'],
       ownerName: json['ownerName'] ?? '',
       ownerAvatar: json['ownerAvatar'] ?? '',
+      returnProof: json["returnProof"],
+      trackingNumber: json["trackingNumber"],
+      note: json["note"],
       items: (json['items'] as List? ?? [])
           .map((item) => OrderDetailItem.fromJson(item))
           .toList(),
