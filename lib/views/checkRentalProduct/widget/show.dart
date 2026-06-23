@@ -15,7 +15,7 @@ class ReportSuccessScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Icon thành công
+
               const CircleAvatar(
                 radius: 40,
                 backgroundColor: Color(0xFFE8F5E9),
@@ -29,7 +29,6 @@ class ReportSuccessScreen extends StatelessWidget {
               
               const SizedBox(height: 32),
               
-              // Box thông tin tiếp theo
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(color: Colors.grey[50], borderRadius: BorderRadius.circular(12)),

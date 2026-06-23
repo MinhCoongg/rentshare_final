@@ -32,8 +32,7 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
 
   Future<void> _loadPolicies() async {
     int pId = widget.order.items[0].productId;
-    debugPrint("ProductId is: $pId");
-    final data = await context.read<RentalOrderViewModel>().fetchPolicies(4);
+    final data = await context.read<RentalOrderViewModel>().fetchPolicies(pId);
     debugPrint("Số lượng chính sách lấy được: ${data.length}");
     if (mounted) setState(() => _policies = data);
   }
@@ -101,25 +100,49 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
       );
 
   Widget _buildStep2() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text("2. Ảnh/Video làm bằng chứng *", style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: _pickImage,
-            child: DottedBorder(
-              borderType: BorderType.RRect, radius: const Radius.circular(12), color: Colors.deepPurple,
-              child: Container(height: 120, width: double.infinity, color: Colors.grey[50],
-                child: _image != null ? Image.file(_image!, fit: BoxFit.cover) : const Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.camera_alt, color: Colors.deepPurple), Text("Thêm ảnh/video")]),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("2. Ảnh làm bằng chứng *", style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        _image == null 
+          ? GestureDetector(
+              onTap: _pickImage,
+              child: DottedBorder(
+                borderType: BorderType.RRect, radius: const Radius.circular(12), color: Colors.deepPurple,
+                child: Container(
+                  height: 120, width: double.infinity, color: Colors.grey[50],
+                  child: const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.camera_alt, color: Colors.deepPurple), 
+                    Text("Thêm ảnh")
+                  ]),
+                ),
               ),
+            )
+          : Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(_image!, height: 120, width: double.infinity, fit: BoxFit.cover),
+                ),
+                Positioned(
+                  right: 8, top: 8,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _image = null), 
+                    child: const CircleAvatar(radius: 12, backgroundColor: Colors.red, child: Icon(Icons.close, size: 16, color: Colors.white)),
+                  ),
+                )
+              ],
             ),
-          ),
-          const SizedBox(height: 24),
-          const Text("3. Chi phí đền bù đề xuất (VNĐ) *", style: TextStyle(fontWeight: FontWeight.bold)),
+        
+        const SizedBox(height:15),
+        const Text("3. Chi phí đền bù đề xuất (VNĐ) *", style: TextStyle(fontWeight: FontWeight.bold)),
+
           const SizedBox(height: 10),
+
           TextField(controller: _fee, keyboardType: TextInputType.number, decoration: InputDecoration(prefixText: "VNĐ: ", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
+
         ],
-      );
+    );
 
   Widget _buildTableCell(String text, {bool isHeader = false}) => Padding(
       padding: const EdgeInsets.all(8.0),

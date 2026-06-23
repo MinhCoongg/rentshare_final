@@ -14,6 +14,19 @@ class RentalOrderCard extends StatelessWidget {
     this.onContactPressed,
   });
 
+  String _getStatus(String status) {
+    switch (status) {
+      case 'Pending': return 'Chờ duyệt';
+      case 'Approved': return 'Đã duyệt';
+      case 'Shipping': return 'Đang giao';
+      case 'Delivered': return 'Đang thuê';
+      case 'Returned': return 'Chờ trả';
+      case 'Inspecting': return 'Nghiệm thu';
+      case 'Completed': return 'Hoàn tất';
+      case 'Cancelled': return 'Đã hủy';
+      default: return status;
+    }
+  }
  
 
   @override
@@ -52,8 +65,12 @@ class RentalOrderCard extends StatelessWidget {
                     Icon(Icons.access_time, color: Colors.orange[700], size: 16),
                     const SizedBox(width: 4),
                     Text(
-                      order.status == 'Pending' ? 'Chờ duyệt' : order.status,
-                      style: TextStyle(color: Colors.orange[700], fontWeight: FontWeight.bold, fontSize: 13),
+                      _getStatus(order.status), 
+                      style: TextStyle(
+                        color: Colors.orange[700], 
+                        fontWeight: FontWeight.bold, 
+                        fontSize: 13
+                      ),
                     ),
                   ],
                 )
@@ -123,8 +140,6 @@ class RentalOrderCard extends StatelessWidget {
           }),
 
           const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
-
-          // 3. Địa chỉ thông tin người nhận hàng
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -193,48 +208,64 @@ class RentalOrderCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFFE07A5F)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                    if (order.status == 'Inspecting')
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange, 
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          icon: const Icon(Icons.assignment_turned_in_outlined, color: Colors.white, size: 16),
+                          label: const Text("Xem báo cáo", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          onPressed: onDetailPressed, 
                         ),
-                        icon: const Icon(Icons.assignment_outlined, color: Color(0xFFE07A5F), size: 16),
-                        label: const Text("Xem chi tiết", style: TextStyle(color: Color(0xFFE07A5F), fontWeight: FontWeight.bold)),
-                        onPressed: onDetailPressed,
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.grey[300]!),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        icon: Icon(Icons.chat_bubble_outline, color: Colors.grey[700], size: 16),
-                        label: Text("Liên hệ shop", style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold)),
-                        onPressed: onContactPressed,
+                          if (order.status != 'Inspecting')
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(color: Color(0xFFE07A5F)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                ),
+                                icon: const Icon(Icons.assignment_outlined, color: Color(0xFFE07A5F), size: 16),
+                                label: const Text("Xem chi tiết", style: TextStyle(color: Color(0xFFE07A5F), fontWeight: FontWeight.bold)),
+                                onPressed: onDetailPressed,
+                              ),
+                            ),
+                          
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.grey[300]!),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                              ),
+                              icon: Icon(Icons.chat_bubble_outline, color: Colors.grey[700], size: 16),
+                              label: Text("Liên hệ shop", style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.bold)),
+                              onPressed: onContactPressed,
+                            ),
+                          ),
+                        ],
+                      )
+                              ],
+                            ),
+                          )
+                        ],
                       ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
+                    );
+                  }
+                }
 
-class Convert {
-  static double toDouble(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is int) return value.toDouble();
-    if (value is double) return value;
-    if (value is String) return double.tryParse(value) ?? 0.0;
-    return 0.0;
-  }
+  class Convert {
+    static double toDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is int) return value.toDouble();
+      if (value is double) return value;
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
 }

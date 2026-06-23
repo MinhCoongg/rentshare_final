@@ -193,4 +193,36 @@ class RentalOrderViewModel extends ChangeNotifier {
     }
   }
 
+
+  Future<DamageReport?> fetchDamageReportDirect(int rentalRequestId) async {
+    try {
+
+
+
+      _damageReport = await _orderService.getDamageReport(rentalRequestId);
+      
+      
+      return _damageReport; 
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return null; 
+    }
+  }
+
+
+  Future<Map<String, dynamic>> acceptDamageReport(int orderId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final result = await _orderService.acceptDamageReport(orderId);
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

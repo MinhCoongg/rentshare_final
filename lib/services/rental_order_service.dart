@@ -303,4 +303,22 @@ class RentalOrderService {
       throw Exception("Lỗi kết nối: $e");
     }
   }
+
+  Future<Map<String, dynamic>> acceptDamageReport(int orderId) async {
+    try {
+      final String token = await SharedPrefsUtils.getToken();
+      final response = await http.post(
+        Uri.parse('${ConstantURL.baseUrl}/rental/accept-report/$orderId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      
+      final Map<String, dynamic> data = json.decode(response.body);
+      return {'success': response.statusCode == 200 && data['success'] == true, 'message': data['message']};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }

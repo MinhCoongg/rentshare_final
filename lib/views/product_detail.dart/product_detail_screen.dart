@@ -5,7 +5,8 @@ import 'package:rentshare_app/models/cart_model.dart';
 import 'package:rentshare_app/models/product_model.dart';
 import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
-import 'package:rentshare_app/views/cartpage/cart.dart'; 
+import 'package:rentshare_app/views/cartpage/cart.dart';
+import 'package:rentshare_app/views/checkout_page/checkout.dart'; 
 import 'package:rentshare_app/views/post_product.dart/widgets/prolicies_detail_tab.dart';
 import 'package:rentshare_app/views/product_detail.dart/widget/detailProductTab.dart';
 import '../../viewmodels/product_detail_viewmodel.dart';
@@ -255,8 +256,199 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
   }
 
 
-    Widget _buildBottomAction(ProductModel item) {
+  //   Widget _buildBottomAction(ProductModel item) {
+  //   const themeColor = Color(0xFF0056D2);
+
+  //   return Positioned(
+  //     bottom: 0, left: 0, right: 0,
+  //     child: Container(
+  //       padding: const EdgeInsets.only(top: 10, left: 16, right: 16, bottom: 10),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white, 
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.black.withValues(alpha: 0.06), 
+  //             blurRadius: 10, 
+  //             offset: const Offset(0, -4),
+  //           )
+  //         ],
+  //       ),
+  //       child: SafeArea(
+  //         bottom: true,
+  //         top: false,
+  //         child: Row(
+  //           children: [
+  //             Expanded(
+  //               child: OutlinedButton(
+  //                 onPressed: () async {
+  //                 final newItem = RentalCartItem(
+  //                   productId: item.id, 
+  //                   ownerId: item.ownerId,
+  //                   ownerAvatar: item.ownerAvatar,
+  //                   ownerName: item.ownerName,
+  //                   ownerPhone: item.shopInfo?.receiverPhone ?? '0789617936',
+  //                   pricePerDay: double.tryParse(item.pricePerDay) ?? 0.0,
+  //                   title: item.title,
+  //                   image: item.images.isNotEmpty ? item.images.first : '', 
+  //                   quantity: 1, 
+  //                   maxStock: item.quantity,
+  //                   depositAmount: double.tryParse(item.depositAmount) ?? 0.0, 
+  //                   ownerAddress: item.location,
+  //                   tierPricings: item.tierPricings
+  //                 );
+  //                 final cartProvider = context.read<RentalCartProvider>();
+  //                 String result = await cartProvider.addToCart(newItem);
+  //                 if (result == 'DIFFERENT_SHOP') {
+  //                   if (!mounted) return;
+  //                   bool shouldClearCart = await DifferentShopDialog.show(
+  //                     context: context, 
+  //                     title: "Thông báo khác Shop", 
+  //                     content: "Bạn đang có sản phẩm từ Shop khác trong đơn thuê. Bạn có muốn xóa giỏ hiện tại và thuê sản phẩm mới này không?",
+  //                     actionButtonText: "Xóa giỏ và thêm", 
+  //                   );
+  //                   if (shouldClearCart) {
+  //                     await cartProvider.clearAndAddNewProduct(newItem);
+                      
+  //                     if (!mounted) return;
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       const SnackBar(
+  //                         content: Text("Đã dọn sạch giỏ cũ và làm mới với sản phẩm của Shop này!"), 
+  //                         backgroundColor: Color(0xff1B8A4B),
+  //                         duration: Duration(milliseconds: 800), 
+  //                       ),
+  //                     );
+
+  //                     Future.delayed(const Duration(milliseconds: 1000), () {
+  //                       if (!mounted) return;
+  //                       Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
+  //                     });
+  //                   }
+
+  //                 } else {
+  //                   if (!mounted) return;
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     const SnackBar(
+  //                       content: Text("Đã thêm sản phẩm vào giỏ thuê thành công!"), 
+  //                       backgroundColor: Color(0xff1B8A4B),
+  //                       duration: Duration(milliseconds: 800),
+  //                     ),
+  //                   );
+  //                   Future.delayed(const Duration(milliseconds: 1000), () {
+  //                     if (!mounted) return;
+  //                     Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
+  //                   });
+  //                 }
+
+                  
+  //               },
+  //                 style: OutlinedButton.styleFrom(
+  //                   foregroundColor: themeColor,
+  //                   side: const BorderSide(color: themeColor, width: 1.5), 
+  //                   padding: const EdgeInsets.symmetric(vertical: 14),
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(8), 
+  //                   ),
+  //                 ),
+  //                 child: const Text(
+  //                   "Thêm vào đơn thuê",
+  //                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+  //                 ),
+  //               ),
+  //             ),
+              
+  //             const SizedBox(width: 12), 
+
+  //             Expanded(
+  //               child: ElevatedButton(
+  //                 onPressed: () {
+  //                   // Logic điều hướng trực tiếp qua trang Thanh toán đơn thuê
+  //                 },
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: themeColor,
+  //                   foregroundColor: Colors.white,
+  //                   padding: const EdgeInsets.symmetric(vertical: 14),
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(8),
+  //                   ),
+  //                   elevation: 0, 
+  //                 ),
+  //                 child: const Text(
+  //                   "Thuê ngay",
+  //                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+  Widget _buildBottomAction(ProductModel item) {
     const themeColor = Color(0xFF0056D2);
+
+    Future<void> handleAddToCart(bool isCheckout) async {
+      final newItem = RentalCartItem(
+        productId: item.id,
+        ownerId: item.ownerId,
+        ownerAvatar: item.ownerAvatar,
+        ownerName: item.ownerName,
+        ownerPhone: item.shopInfo?.receiverPhone ?? '0789617936',
+        pricePerDay: double.tryParse(item.pricePerDay) ?? 0.0,
+        title: item.title,
+        image: item.images.isNotEmpty ? item.images.first : '',
+        quantity: 1,
+        maxStock: item.quantity,
+        depositAmount: double.tryParse(item.depositAmount) ?? 0.0,
+        ownerAddress: item.location,
+        tierPricings: item.tierPricings
+      );
+
+      final cartProvider = context.read<RentalCartProvider>();
+      String result = await cartProvider.addToCart(newItem);
+
+      if (result == 'DIFFERENT_SHOP') {
+        if (!mounted) return;
+        bool shouldClearCart = await DifferentShopDialog.show(
+          context: context,
+          title: "Thông báo khác Shop",
+          content: "Bạn đang có sản phẩm từ Shop khác trong đơn thuê. Bạn có muốn xóa giỏ hiện tại và thuê sản phẩm mới này không?",
+          actionButtonText: "Xóa giỏ và thêm",
+        );
+        if (shouldClearCart) {
+          await cartProvider.clearAndAddNewProduct(newItem);
+        } else {
+          return; 
+        }
+      }
+
+      if (!mounted) return;
+        if (isCheckout) {
+          final cartItems = cartProvider.items;
+          Navigator.push(
+            context, 
+            MaterialPageRoute(
+              builder: (context) => CheckoutPage(
+                product: cartItems.first,
+                shopAddress: cartItems.first.ownerAddress 
+                )
+              )
+          );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Đã thêm sản phẩm vào giỏ thuê thành công!"),
+            backgroundColor: Color(0xff1B8A4B),
+            duration: Duration(milliseconds: 800),
+          ),
+        );
+
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => const CartPage())
+        );
+      }
+    }
 
     return Positioned(
       bottom: 0, left: 0, right: 0,
@@ -264,117 +456,35 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
         padding: const EdgeInsets.only(top: 10, left: 16, right: 16, bottom: 10),
         decoration: BoxDecoration(
           color: Colors.white, 
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06), 
-              blurRadius: 10, 
-              offset: const Offset(0, -4),
-            )
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, -4))]
         ),
         child: SafeArea(
-          bottom: true,
-          top: false,
+          bottom: true, top: false,
           child: Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () async {
-                  final newItem = RentalCartItem(
-                    productId: item.id, 
-                    ownerId: item.ownerId,
-                    ownerAvatar: item.ownerAvatar,
-                    ownerName: item.ownerName,
-                    ownerPhone: item.shopInfo?.receiverPhone ?? '0789617936',
-                    pricePerDay: double.tryParse(item.pricePerDay) ?? 0.0,
-                    title: item.title,
-                    image: item.images.isNotEmpty ? item.images.first : '', 
-                    quantity: 1, 
-                    maxStock: item.quantity,
-                    depositAmount: double.tryParse(item.depositAmount) ?? 0.0, 
-                    ownerAddress: item.location,
-                    tierPricings: item.tierPricings
-                  );
-                  final cartProvider = context.read<RentalCartProvider>();
-                  String result = await cartProvider.addToCart(newItem);
-                  if (result == 'DIFFERENT_SHOP') {
-                    if (!mounted) return;
-                    bool shouldClearCart = await DifferentShopDialog.show(
-                      context: context, 
-                      title: "Thông báo khác Shop", 
-                      content: "Bạn đang có sản phẩm từ Shop khác trong đơn thuê. Bạn có muốn xóa giỏ hiện tại và thuê sản phẩm mới này không?",
-                      actionButtonText: "Xóa giỏ và thêm", 
-                    );
-                    if (shouldClearCart) {
-                      await cartProvider.clearAndAddNewProduct(newItem);
-                      
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Đã dọn sạch giỏ cũ và làm mới với sản phẩm của Shop này!"), 
-                          backgroundColor: Color(0xff1B8A4B),
-                          duration: Duration(milliseconds: 800), 
-                        ),
-                      );
-
-                      Future.delayed(const Duration(milliseconds: 1000), () {
-                        if (!mounted) return;
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
-                      });
-                    }
-
-                  } else {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Đã thêm sản phẩm vào giỏ thuê thành công!"), 
-                        backgroundColor: Color(0xff1B8A4B),
-                        duration: Duration(milliseconds: 800),
-                      ),
-                    );
-                    Future.delayed(const Duration(milliseconds: 1000), () {
-                      if (!mounted) return;
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
-                    });
-                  }
-
-                  
-                },
+                  onPressed: () => handleAddToCart(false), 
                   style: OutlinedButton.styleFrom(
                     foregroundColor: themeColor,
-                    side: const BorderSide(color: themeColor, width: 1.5), 
+                    side: const BorderSide(color: themeColor, width: 1.5),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8), 
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text(
-                    "Thêm vào đơn thuê",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
+                  child: const Text("Thêm vào đơn thuê", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 ),
               ),
-              
-              const SizedBox(width: 12), 
-
+              const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Logic điều hướng trực tiếp qua trang Thanh toán đơn thuê
-                  },
+                  onPressed: () => handleAddToCart(true), 
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: themeColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: themeColor, foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 0, 
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
                   ),
-                  child: const Text(
-                    "Thuê ngay",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
+                  child: const Text("Thuê ngay", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 ),
               ),
             ],

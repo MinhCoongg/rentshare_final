@@ -43,9 +43,9 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'RentShare App',
-      //initialRoute: '/login',
+      initialRoute: '/login',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: ReportSuccessScreen(),
+      //home: ReportSuccessScreen(),
       routes: {
         '/login': (context) => const LoginView(),
         '/home': (context) => const HomePage(), 

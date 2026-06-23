@@ -162,7 +162,7 @@ class PostProductViewModel extends ChangeNotifier {
   }
 
   String? _validateStep1() {
-    //if (model.images.isEmpty) return "Vui lòng tải lên ít nhất 1 ảnh sản phẩm.";
+    if (model.images.isEmpty) return "Vui lòng tải lên ít nhất 1 ảnh sản phẩm.";
     if (model.title.trim().isEmpty) return "Tiêu đề Tên sản phẩm bắt buộc phải nhập!";
     if (model.quantity <= 0) return "Số lượng món đồ sẵn có phải lớn hơn 0!";
     if (model.categoryId == null) return "Vui lòng chọn loại sản phẩm nhóm nhỏ!";

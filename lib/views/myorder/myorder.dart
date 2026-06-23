@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/views/myorder/widget/cardInforProduct.dart';
+import 'package:rentshare_app/views/renter_check_complaine/checkcomplaine.dart';
 
 class MyRentalsScreen extends StatefulWidget {
   const MyRentalsScreen({super.key});
@@ -18,6 +19,7 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
     {'title': 'Đang giao', 'status': 'Shipping'},
     {'title': 'Đang thuê', 'status': 'Delivered'}, 
     {'title': 'Chờ trả', 'status': 'Returned'}, 
+    {'title': 'Nghiệm thu', 'status': 'Inspecting'},
     {'title': 'Đã hoàn tất', 'status': 'Completed'},
     {'title': 'Đã hủy', 'status': 'Cancelled'},
   ];
@@ -120,8 +122,20 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
               final order = viewModel.myOrders[index];
               return RentalOrderCard(
                 order: order,
-                onDetailPressed: () {
-                  Navigator.pushNamed(context, '/rental-detail', arguments: order.id);
+                onDetailPressed: () async {
+                  if (order.status == 'Inspecting') {
+                    // Không cần fetch ở đây nữa, đẩy qua màn hình cho màn hình đó tự fetch
+                    Navigator.of(context, rootNavigator: true).push(
+                      MaterialPageRoute(
+                        builder: (_) => ChiTietBaoCaoScreen(
+                          orderId: order.id, // Truyền ID
+                          order: order,      // Truyền đối tượng order
+                        ),
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context, rootNavigator: true).pushNamed('/rental-detail', arguments: order.id);
+                  }
                 },
                 onContactPressed: () {
                   // Logic chat chẹt mở cuộc hội thoại
