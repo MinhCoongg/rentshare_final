@@ -162,7 +162,7 @@ class PostProductViewModel extends ChangeNotifier {
   }
 
   String? _validateStep1() {
-    if (model.images.isEmpty) return "Vui lòng tải lên ít nhất 1 ảnh sản phẩm.";
+    //if (model.images.isEmpty) return "Vui lòng tải lên ít nhất 1 ảnh sản phẩm.";
     if (model.title.trim().isEmpty) return "Tiêu đề Tên sản phẩm bắt buộc phải nhập!";
     if (model.quantity <= 0) return "Số lượng món đồ sẵn có phải lớn hơn 0!";
     if (model.categoryId == null) return "Vui lòng chọn loại sản phẩm nhóm nhỏ!";
@@ -222,25 +222,21 @@ class PostProductViewModel extends ChangeNotifier {
   }
 
   String? _validateStep5() {
-    if (activePolicies.isEmpty) {
-      return "Vui lòng thiết lập ít nhất 1 chính sách thuê.";
+    final treHan = activePolicies.firstWhere((p) => p.type == "Trễ hạn");
+    if (treHan.fineValue <= 0) {
+      return "Vui lòng thiết lập mức phí cho chính sách Trễ hạn!";
     }
 
-    final Set<String> checkedTypes = {};
-    for (var policy in activePolicies) {
-      if (policy.content.trim().isEmpty) {
-        return "Nội dung chi tiết của chính sách '${policy.type}' bắt buộc không được bỏ trống!";
+    final huHong = activePolicies.firstWhere((p) => p.type == "Hư hỏng");
+    if (huHong.unit == "PERCENT") {
+      if ((huHong.lightDamage ?? 0) <= 0 || 
+          (huHong.mediumDamage ?? 0) <= 0 || 
+          (huHong.heavyDamage ?? 0) <= 0) {
+        return "Vui lòng kiểm tra lại các mức bồi thường hư hỏng!";
       }
-
-      if (policy.type == "Khác") continue; 
-      
-      if (checkedTypes.contains(policy.type)) {
-        return "Chính sách '${policy.type}' đã tồn tại! Vui lòng không tạo trùng lặp mốc quy định này.";
-      }
-      checkedTypes.add(policy.type);
     }
     
-    return null;
+    return null; 
   }
 
   void prevStep() {
@@ -270,7 +266,7 @@ class PostProductViewModel extends ChangeNotifier {
       model.tierPrices = tierPrices;
       model.policies = activePolicies;
       model.quantity = model.quantity > 0 ? model.quantity : 1;
-
+      
       final success = await ApiService.submitProduct(
         product: model, 
         imageFiles: selectedFiles, 
@@ -313,39 +309,54 @@ class PostProductViewModel extends ChangeNotifier {
     }
   }
 
-  List<PolicyModel> activePolicies = [];
 
+  double lightValue = 20.0;
+  double mediumValue = 50.0;
+  double heavyValue = 100.0;
+  List<PolicyModel> activePolicies = [
+    PolicyModel(type: "Trễ hạn"),
+    PolicyModel(type: "Hư hỏng"),
+    PolicyModel(type: "Hủy đơn"),
+    PolicyModel(type: "Mất sản phẩm"),
+  ];
 
-  void addNewPolicyField() {
-    activePolicies.add(PolicyModel(type: "Khác", content: "")); 
+  void updatePolicyFineValue(int index, double newValue) {
+    if (activePolicies[index].type == "Hủy đơn" || activePolicies[index].type == "Mất sản phẩm") return;
+    activePolicies[index].fineValue = newValue;
     notifyListeners();
   }
 
-  void removePolicyField(int index) {
-    if (index >= 0 && index < activePolicies.length) {
-      activePolicies.removeAt(index);
-      notifyListeners();
-    }
+  void updatePolicyUnit(int index, String newUnit) {
+    activePolicies[index].unit = newUnit;
+    notifyListeners();
   }
-  void updatePolicyType(int index, String newType) {
-    if (index >= 0 && index < activePolicies.length) {
-      String currentContent = activePolicies[index].content;
-      activePolicies[index] = PolicyModel(type: newType, content: currentContent);
-      notifyListeners(); 
-    }
+
+  void updateDamageValues(double l, double m, double h) {
+    debugPrint("UPDATE DAMAGE");
+    debugPrint("$l - $m - $h");
+
+    lightValue = l;
+    mediumValue = m;
+    heavyValue = h;
+
+    final policy = activePolicies.firstWhere((p) => p.type == "Hư hỏng");
+    policy.lightDamage = l;
+    policy.mediumDamage = m;
+    policy.heavyDamage = h;
+
+    debugPrint(
+        "Policy = ${policy.lightDamage} ${policy.mediumDamage} ${policy.heavyDamage}");
+
+    notifyListeners();
   }
-  void updatePolicyContent(int index, String newContent) {
-    if (index >= 0 && index < activePolicies.length) {
-      String currentType = activePolicies[index].type;
-      activePolicies[index] = PolicyModel(type: currentType, content: newContent);
-      errorMessage = null;
-      notifyListeners(); 
-    }
-  }
+
+  
+
   void setLoading(bool v) {
     isLoading = v;
     notifyListeners();
   }
+
 
          
 

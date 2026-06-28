@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/models/policy_model.dart';
+import 'package:rentshare_app/models/rentalOrderDetail.dart';
+import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:rentshare_app/views/checkRentalProduct/widget/show.dart';
@@ -17,12 +19,13 @@ class NghiemThuProductScreen extends StatefulWidget {
 
 class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
   int _step = 1;
-  String _status = 'Good';
+  Set<String> _selectedIssues = {}; 
+  double? _selectedDamagePercent;
   File? _image;
   final ImagePicker _picker = ImagePicker();
+  OrderDetailItem get currentItem => widget.order.items[0];
   List<PolicyModel> _policies = [];
   final TextEditingController _note = TextEditingController();
-  final TextEditingController _fee = TextEditingController();
 
   @override
   void initState() {
@@ -33,7 +36,6 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
   Future<void> _loadPolicies() async {
     int pId = widget.order.items[0].productId;
     final data = await context.read<RentalOrderViewModel>().fetchPolicies(pId);
-    debugPrint("Số lượng chính sách lấy được: ${data.length}");
     if (mounted) setState(() => _policies = data);
   }
 
@@ -42,23 +44,15 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
     if (picked != null) setState(() => _image = File(picked.path));
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black),
-          title: const Text("Nhập nghiệm thu sản phẩm", style: TextStyle(color: Colors.black, fontSize: 18))),
+      appBar: AppBar(backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black), title: const Text("Nghiệm thu", style: TextStyle(color: Colors.black))),
       body: Column(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: _step == 1 ? _buildStep1() : _buildStep2(),
-            ),
-          ),
+          Expanded(child: SingleChildScrollView(padding: const EdgeInsets.all(20), child: _step == 1 ? _buildStep1() : _buildStep2())),
           _buildFooter(),
         ],
       ),
@@ -66,123 +60,184 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
   }
 
   Widget _buildStep1() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text("1. Tình trạng sản phẩm *", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 16),
-          _option("Sản phẩm còn tốt", "Không mất phí", "Good"),
-          _option("Trầy xước nhẹ", "Gợi ý phí: 20.000đ - 50.000đ", "Damaged"),
-          _option("Hư hỏng", "Phí: 50.000đ - 150.000đ", "Broken"),
-          const SizedBox(height: 24),
-          if (_policies.isNotEmpty) ...[
-            const Text("Chính sách hư hỏng & đền bù:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple)),
-            const SizedBox(height: 12),
-            Table(
-              border: TableBorder.all(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(8)),
-              columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(2)},
-              children: [
-                TableRow(decoration: BoxDecoration(color: Colors.grey.shade100), children: [
-                  _buildTableCell("Tình trạng", isHeader: true),
-                  _buildTableCell("Mô tả / Phí", isHeader: true),
-                ]),
-                ..._policies.map((p) => TableRow(children: [
-                  _buildTableCell(p.policyType),
-                  _buildTableCell(p.content),
-                ])),
-              ],
-            ),
-            const SizedBox(height: 24),
-          ],
-          const Text("2. Mô tả chi tiết", style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          TextField(controller: _note, maxLines: 3, decoration: InputDecoration(hintText: "Nhập chi tiết hư hỏng...", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text("1. Tình trạng sản phẩm *", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      const SizedBox(height: 16),
+      _buildStatusOptions(),
+      const SizedBox(height: 24),
+      const Text("2. Mô tả chi tiết", style: TextStyle(fontWeight: FontWeight.bold)),
+      const SizedBox(height: 10),
+      TextField(controller: _note, maxLines: 3, decoration: InputDecoration(hintText: "Nhập chi tiết...", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
+    ],
+  );
 
   Widget _buildStep2() => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("2. Ảnh làm bằng chứng *", style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-        _image == null 
-          ? GestureDetector(
-              onTap: _pickImage,
-              child: DottedBorder(
-                borderType: BorderType.RRect, radius: const Radius.circular(12), color: Colors.deepPurple,
-                child: Container(
-                  height: 120, width: double.infinity, color: Colors.grey[50],
-                  child: const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Icon(Icons.camera_alt, color: Colors.deepPurple), 
-                    Text("Thêm ảnh")
-                  ]),
-                ),
-              ),
-            )
-          : Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(_image!, height: 120, width: double.infinity, fit: BoxFit.cover),
-                ),
-                Positioned(
-                  right: 8, top: 8,
-                  child: GestureDetector(
-                    onTap: () => setState(() => _image = null), 
-                    child: const CircleAvatar(radius: 12, backgroundColor: Colors.red, child: Icon(Icons.close, size: 16, color: Colors.white)),
-                  ),
-                )
-              ],
-            ),
-        
-        const SizedBox(height:15),
-        const Text("3. Chi phí đền bù đề xuất (VNĐ) *", style: TextStyle(fontWeight: FontWeight.bold)),
-
-          const SizedBox(height: 10),
-
-          TextField(controller: _fee, keyboardType: TextInputType.number, decoration: InputDecoration(prefixText: "VNĐ: ", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
-
-        ],
-    );
-
-  Widget _buildTableCell(String text, {bool isHeader = false}) => Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(text, style: TextStyle(fontSize: 11, fontWeight: isHeader ? FontWeight.bold : FontWeight.normal)));
-
-  Widget _option(String title, String sub, String val) => InkWell(
-        onTap: () => setState(() => _status = val),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: _status == val ? Colors.deepPurple.withOpacity(0.05) : Colors.transparent, border: Border.all(color: _status == val ? Colors.deepPurple : Colors.grey[300]!), borderRadius: BorderRadius.circular(12)),
-          child: Row(children: [Icon(_status == val ? Icons.radio_button_checked : Icons.radio_button_off, color: Colors.deepPurple), const SizedBox(width: 12), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontWeight: FontWeight.bold)), Text(sub, style: const TextStyle(fontSize: 12, color: Colors.grey))])]),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text("2. Ảnh làm bằng chứng *", style: TextStyle(fontWeight: FontWeight.bold)),
+      const SizedBox(height: 12),
+      _image == null ? GestureDetector(onTap: _pickImage, child: DottedBorder(borderType: BorderType.RRect, radius: const Radius.circular(12), color: Colors.deepPurple, child: Container(height: 120, width: double.infinity, color: Colors.grey[50], child: const Center(child: Text("Thêm ảnh")))))
+        : Stack(children: [ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(_image!, height: 120, width: double.infinity, fit: BoxFit.cover)), Positioned(right: 8, top: 8, child: GestureDetector(onTap: () => setState(() => _image = null), child: const CircleAvatar(radius: 12, backgroundColor: Colors.red, child: Icon(Icons.close, size: 16, color: Colors.white))))]),
+      const SizedBox(height: 20),
+      const Text("3. Chi phí đền bù (Tự động tính) *", style: TextStyle(fontWeight: FontWeight.bold)),
+      const SizedBox(height: 10),
+        Text(
+          "${FormatUtils.formatMoney(_calculateTotalFee())} VNĐ",
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),
         ),
-      );
+    ],
+  );
 
   Widget _buildFooter() => Container(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            if (_step == 2) Expanded(child: OutlinedButton(onPressed: () => setState(() => _step = 1), child: const Text("Quay lại"))),
-            if (_step == 2) const SizedBox(width: 16),
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, padding: const EdgeInsets.symmetric(vertical: 16)),
-                onPressed: () async {
-                  if (_step == 1) setState(() => _step = 2);
-                  else {
-                    bool success = await context.read<RentalOrderViewModel>().sendDamageReport(widget.order.id, "Tình trạng: $_status. Ghi chú: ${_note.text}", double.tryParse(_fee.text) ?? 0, _image);
-                    if (success) {
-                      Navigator.pushReplacement(
-                        context, 
-                        MaterialPageRoute(builder: (_) => const ReportSuccessScreen())
-                      );
-                    }
+    padding: const EdgeInsets.all(20),
+    child: Row(
+      children: [
+        if (_step == 2) Expanded(child: OutlinedButton(onPressed: () => setState(() => _step = 1), child: const Text("Quay lại"))),
+        if (_step == 2) const SizedBox(width: 16),
+        Expanded(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, padding: const EdgeInsets.symmetric(vertical: 16)),
+            onPressed: () async {
+              if (_selectedIssues.contains('Good') && _selectedIssues.length == 1) {
+                bool success = await context.read<RentalOrderViewModel>().sendDamageReport(widget.order.id, "Tình trạng: Tốt.", 0, null);
+                if (success && mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReportSuccessScreen()));
+              } else {
+                if (_step == 1) setState(() => _step = 2);
+                else {
+                  if (_selectedIssues.contains('Broken') && _selectedDamagePercent == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Vui lòng chọn mức độ hư hỏng!")));
+                    return;
                   }
-                },
-                child: Text(_step == 1 ? "Tiếp tục" : "Gửi báo cáo", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                 int finalFee = _calculateTotalFee().toInt();
+                  bool success = await context.read<RentalOrderViewModel>().sendDamageReport(widget.order.id, "Tình trạng: ${_selectedIssues.join(', ')}. Ghi chú: ${_note.text}", finalFee.toDouble(), _image);
+                  if (success && mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ReportSuccessScreen()));
+                }
+              }
+            },
+            child: Text(_selectedIssues.contains('Good') && _selectedIssues.length == 1 ? "Hoàn tất" : (_step == 1 ? "Tiếp tục" : "Gửi báo cáo")),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildStatusOptions() {
+    final damagePolicy = _policies.firstWhere((p) => p.type == "Hư hỏng", orElse: () => PolicyModel(type: "Hư hỏng", lightDamage: 10, mediumDamage: 40, heavyDamage: 90));
+    return Column(
+      children: [
+        _buildCheckboxItem("Sản phẩm còn tốt", "Không mất phí", "Good", damagePolicy),
+        _buildCheckboxItem("Trễ hạn", "Phạt theo quy định", "Late", damagePolicy),
+        _buildCheckboxItem("Hư hỏng", "Phí: Tùy mức độ", "Broken", damagePolicy),
+      ],
+    );
+  }
+
+  Widget _buildCheckboxItem(String title, String sub, String val, PolicyModel damagePolicy) {
+    bool isChecked = _selectedIssues.contains(val);
+    return Column(
+      children: [
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(sub, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          value: isChecked,
+          activeColor: Colors.deepPurple,
+          onChanged: (bool? value) {
+            setState(() {
+              if (value == true) {
+                if (val == "Broken") {
+                  _selectedIssues.remove("Good");
+                } else if (val == "Good") {
+                  _selectedIssues.remove("Broken");
+                }
+                _selectedIssues.add(val);
+              } else {
+                _selectedIssues.remove(val);
+              }
+            });
+          },
+        ),
+
+        if (val == "Late" && isChecked)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
+              child: Text(
+                "Sản phẩm trễ $_calculatedLateDays ngày theo hệ thống", 
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
               ),
             ),
-          ],
-        ),
+          ),
+        if (val == "Broken" && isChecked) _buildDamageButtons(damagePolicy),
+      ],
+    );
+  }
+
+ Widget _buildDamageButtons(PolicyModel damagePolicy) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 48, bottom: 16),
+    child: Row(
+      children: [
+        Expanded(child: _buildPercentButton("Nhẹ", damagePolicy.lightDamage ?? 10)),
+        const SizedBox(width: 8),
+        Expanded(child: _buildPercentButton("Vừa", damagePolicy.mediumDamage ?? 40)),
+        const SizedBox(width: 8),
+        Expanded(child: _buildPercentButton("Nặng", damagePolicy.heavyDamage ?? 90)),
+      ],
+    ),
+  );
+}
+
+  Widget _buildPercentButton(String label, double percent) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(side: BorderSide(color: _selectedDamagePercent == percent ? Colors.deepPurple : Colors.grey[300]!), backgroundColor: _selectedDamagePercent == percent ? Colors.deepPurple.withOpacity(0.1) : null),
+      onPressed: () => setState(() => _selectedDamagePercent = percent),
+      child: Text("$label (${percent.toInt()}%)"),
+    );
+  }
+
+
+  int get _calculatedLateDays {
+    try {
+      List<String> parts = widget.order.endDateFormatted.split('/');
+      DateTime endDate = DateTime(
+        int.parse(parts[2]), // Năm
+        int.parse(parts[1]), // Tháng
+        int.parse(parts[0]), // Ngày
       );
+      
+      DateTime now = DateTime.now();
+      if (now.isAfter(endDate)) {
+        return now.difference(endDate).inDays;
+      }
+    } catch (e) {
+      debugPrint("Lỗi parse ngày: $e");
+      return 0;
+    }
+    return 0;
+  }
+
+  double _calculateTotalFee() {
+    double deposit = double.tryParse(currentItem.depositAmount) ?? 0;
+    double damageFine = _selectedIssues.contains('Broken') 
+        ? (deposit * (_selectedDamagePercent ?? 0) / 100) 
+        : 0;
+    final latePolicy = _policies.firstWhere(
+      (p) => p.type == "Trễ hạn", 
+      orElse: () => PolicyModel(type: "Trễ hạn", fineValue: 0, unit: 'VND')
+    );
+
+    double lateFine = 0;
+    if (_selectedIssues.contains('Late')) {
+      if (latePolicy.unit == 'PERCENT') {
+        lateFine = _calculatedLateDays * (deposit * latePolicy.fineValue / 100);
+      } else {
+        lateFine = _calculatedLateDays * latePolicy.fineValue;
+      }
+    }
+    return (damageFine + lateFine).roundToDouble();
+  }
 }

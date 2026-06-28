@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/models/category_model.dart';
 import 'package:rentshare_app/models/producthome_model.dart';
+import 'package:rentshare_app/views/filterProduct/product_list_filter_screen.dart';
 import 'package:rentshare_app/views/home_product/widget/cardproduct.dart';
 import 'package:rentshare_app/views/home_product/widget/shoprate.dart';
 import 'package:rentshare_app/views/product_detail.dart/product_detail_screen.dart'; 
@@ -15,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
+  final TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -24,6 +25,12 @@ class _HomePageState extends State<HomePage> {
       homeVm.fetchCategories(); 
       homeVm.fetchProducts();   
     });
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    _searchController.dispose();
   }
 
 
@@ -78,13 +85,28 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Icon(Icons.search_rounded, color: Colors.grey[400], size: 22),
                         const SizedBox(width: 8),
-                        const Expanded(
+                        Expanded(
                           child: TextField(
-                            decoration: InputDecoration(
+                            controller: _searchController, 
+                            decoration: const InputDecoration(
                               hintText: "Bạn muốn thuê gì?",
                               hintStyle: TextStyle(color: Colors.grey, fontSize: 13.5),
                               border: InputBorder.none,
                             ),
+                            onSubmitted: (value) {
+                              if (value.isNotEmpty) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProductListScreen(
+                                      categoryId: 0, 
+                                      categoryName: "Kết quả: $value",
+                                      keyword: value, 
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ),
                         CircleAvatar(
@@ -116,12 +138,19 @@ class _HomePageState extends State<HomePage> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: GestureDetector(
-                              onTap: () {
-                                
-                              },
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProductListScreen(
+                                    categoryId: cat.id,
+                                    categoryName: cat.categoryName,
+                                  ),
+                                ),
+                              );
+                            },
                               child: Column(
                                 children: [
-                                  
                                   Container(
                                     width: 52,
                                     height: 52,

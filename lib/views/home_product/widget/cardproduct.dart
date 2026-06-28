@@ -69,7 +69,7 @@ class ProductHomeCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      "${FormatUtils.formatMoney(double.parse(product.depositAmount))}đ / ngày",
+                      "${FormatUtils.formatMoney(product.minPrice)}đ / ngày",
                       style: TextStyle(color: themeColor, fontWeight: FontWeight.bold, fontSize: 12.5),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

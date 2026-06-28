@@ -5,6 +5,7 @@ class ProductHomeModel {
   final int addressId;
   final String title;
   final String depositAmount;
+  final double minPrice;
   final int quantity;
   final String status;
   final String createdAt;
@@ -20,6 +21,7 @@ class ProductHomeModel {
     required this.addressId,
     required this.title,
     required this.depositAmount,
+    required this.minPrice,
     required this.quantity,
     required this.status,
     required this.createdAt,
@@ -47,6 +49,7 @@ class ProductHomeModel {
       addressId: json['addressId'] ?? 0,
       title: json['title'] ?? '',
       depositAmount: json['depositAmount']?.toString() ?? '0', 
+      minPrice: double.tryParse(json['minPrice'].toString(),) ??0.0,
       quantity: json['quantity'] ?? 0,
       status: json['status'] ?? 'Available',
       createdAt: json['createdAt'] ?? '',

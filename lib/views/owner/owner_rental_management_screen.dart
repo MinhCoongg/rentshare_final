@@ -260,7 +260,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
         width: double.infinity,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF6200EE), // Màu tím đậm sang chảnh y Figma
+            backgroundColor: const Color(0xFF6200EE), 
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             elevation: 0,
@@ -377,41 +377,74 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                         ],
                       ),
                     ),
-
                     _buildCardWrapper(
                       title: "Sản phẩm thuê",
                       child: Column(
                         children: [
-                          ...order.items.map<Widget>((item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: item.image != null && item.image.isNotEmpty 
-                                      ? Image.network(item.image, width: 50, height: 50, fit: BoxFit.cover)
-                                      : Container(width: 50, height: 50, color: Colors.grey[200], child: const Icon(Icons.image, size: 20)),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                          ...order.items.map<Widget>((item) {
+                          bool isSelected = viewModel.selectedProducts[item.productId]?.isSelected ?? true;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: Column(
+                                children: [
+                                  Row(
                                     children: [
-                                      Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                      Text("${_format(item.pricePerDay)} / ngày", style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+                                      Checkbox(
+                                        value: isSelected,
+                                        activeColor: const Color(0xFF00B4D8),
+                                        onChanged: (bool? value) {
+                                          if (order.status == 'Pending') {
+                                            viewModel.toggleProductSelection(item.productId, value ?? false);
+                                          }
+                                        },
+                                      ),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: item.image.isNotEmpty
+                                            ? Image.network(item.image, width: 50, height: 50, fit: BoxFit.cover)
+                                            : Container(width: 50, height: 50, color: Colors.grey[200], child: const Icon(Icons.image, size: 20)),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                            Text("${_format(item.pricePerDay)} / ngày", style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text("x${item.quantity}", style: TextStyle(color: Colors.grey[600], fontSize: 11)),
+                                          Text(_format((double.parse(item.pricePerDay) * order.rentalDays * item.quantity).toString()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                        ],
+                                      )
                                     ],
                                   ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text("x${item.quantity}", style: TextStyle(color: Colors.grey[600], fontSize: 11)),
-                                    Text(_format((double.parse(item.pricePerDay) * order.rentalDays * item.quantity).toString()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                  ],
-                                )
-                              ],
-                            ),
-                          )),
+                                  if (!isSelected)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 48, right: 16, top: 8),
+                                      child: Column(
+                                        children: [
+                                          DropdownButtonFormField<String>(
+                                            decoration: const InputDecoration(labelText: "Lý do từ chối", isDense: true),
+                                            items: ["Đang bảo trì", "Hết hàng", "Lỗi kỹ thuật"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                                            onChanged: (val) => viewModel.setReasonForProduct(item.productId, val ?? ""),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          TextField(
+                                            decoration: const InputDecoration(hintText: "Nhập ghi chú thêm...", isDense: true),
+                                            onChanged: (val) => viewModel.setNoteForProduct(item.productId, val),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          }),
                           const Divider(height: 20, thickness: 0.8),
                           _buildAmountRow("Tạm tính (tiền thuê)", _format(order.rentalFee)),
                           _buildAmountRow("Phí giao hàng", _format(order.shippingFee)),
@@ -474,9 +507,12 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
 
   void _handleApproveOrder(BuildContext context, dynamic order) async {
     final result = await context.read<RentalOrderViewModel>().approveRequest(order.id);
+    
     if (mounted && result['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Duyệt đơn hàng thành công! Hóa đơn Invoice đã được khởi tạo.")));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đã xử lý đơn hàng thành công!")));
       Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi: ${result['message'] ?? 'Không thể duyệt đơn'}")));
     }
   }
 

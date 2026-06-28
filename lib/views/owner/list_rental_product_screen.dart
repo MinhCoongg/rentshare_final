@@ -138,9 +138,9 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
           }
 
           final int totalOrders = viewModel.ownerOrders.length; 
-          double totalValue = 0;
+          double totalRevenue = 0;
           for (var order in viewModel.ownerOrders) {
-            totalValue += double.tryParse(order.totalAmount.toString()) ?? 0.0;
+            totalRevenue += order.rentalFee; 
           }
 
           return Column(
@@ -173,7 +173,7 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
                           const SizedBox(height: 4),
                           Text("$totalOrders đơn", style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
-                          Text(_tabController.index == 4 ? "Tổng doanh thu: ${FormatUtils.formatMoney(totalValue)}đ" : "Tổng giá trị: ${FormatUtils.formatMoney(totalValue)}đ", style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500)),
+                          Text(_tabController.index == 4 ? "Tổng doanh thu: ${FormatUtils.formatMoney(totalRevenue)}đ" : "Tổng giá trị: ${FormatUtils.formatMoney(totalRevenue)}đ", style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500)),
                         ],
                       ),
                     )
@@ -181,11 +181,8 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
                 ),
               ),
 
-              // 🔔 ĐẮP BANNER NHẮC NHỞ THEO TỪNG TAB
               _buildAlertBanner(_tabController.index),
               const SizedBox(height: 8),
-
-              // 📋 Danh sách Đơn thuê chuẩn chỉ Figma kịch trần
               Expanded(
                 child: viewModel.ownerOrders.isEmpty
                     ? Center(
@@ -209,8 +206,6 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
                           itemCount: viewModel.ownerOrders.length,
                           itemBuilder: (context, index) {
                             final order = viewModel.ownerOrders[index];
-
-                            // Cấu hình màu tag chữ giống Figma
                             String displayStatus = "Đang thuê";
                             Color tagBgColor = const Color(0xFFE6F4EA);
                             Color tagTextColor = const Color(0xFF137333);
@@ -256,7 +251,7 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text("${_tabController.index == 4 ? "Doanh thu" : "Tiền cọc"}: ${FormatUtils.formatMoney(double.tryParse(order.totalAmount.toString()) ?? 0)}đ",
+                                        Text("${_tabController.index == 4 ? "Doanh thu" : "Tiền cọc"}: ${FormatUtils.formatMoney(double.tryParse(order.depositFee.toString()) ?? 0)}đ",
                                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
                                         _buildActionButton(order), 
                                       ],
@@ -276,7 +271,7 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
     );
   }
 
-  // 1. Vẽ cái Tag trạng thái
+
   Widget _buildStatusTag(String label, Color bgColor, Color textColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -285,7 +280,7 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
     );
   }
 
-  // 2. Vẽ dòng thông tin (Khách, Ngày thuê)
+
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
@@ -298,12 +293,15 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
     );
   }
 
-  // 3. Vẽ nút bấm "Xem chi tiết"
   Widget _buildActionButton(dynamic order) {
     return SizedBox(
       height: 32,
       child: OutlinedButton(
-        onPressed: () => Navigator.pushNamed(context, '/owner-filter', arguments: order.id),
+        onPressed: () {
+          Navigator.pushNamed(context, '/owner-filter', arguments: order.id).then((_) {
+            _fetchOrdersByTab(_tabController.index);
+          });
+        },
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Color(0xFF00B4D8)), 
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))

@@ -245,30 +245,50 @@ class ProductPreviewWidget extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    if (vm.activePolicies.isEmpty)
-                      const Text("Áp dụng các quy định thuê mặc định của hệ thống.", style: TextStyle(fontSize: 13, color: Colors.grey))
-                    else
-                      ...vm.activePolicies.map((policy) {
-                        final String pName = policy.type;
-                        final String pContent = policy.content;
-                        
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.info_outline, size: 15, color: Colors.grey),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  "$pName: $pContent", 
-                                  style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.3),
-                                ),
+                    ...vm.activePolicies.map((policy) {
+                      final String pName = policy.type;
+                      String pContent = "";
+                      switch (pName) {
+                        case "Trễ hạn":
+                          pContent = "Phí phạt là ${policy.fineValue.toString().replaceAll('.0', '')} ${policy.unit == 'PERCENT' ? '%' : 'VNĐ'}";
+                          break;
+                          
+                      case "Hư hỏng":
+                          pContent = "Bồi thường theo mức độ:\n"
+                                    "- Hư nhẹ: ${policy.lightDamage?.toInt()}%\n"
+                                    "- Hư vừa: ${policy.mediumDamage?.toInt()}%\n"
+                                    "- Hư nặng: ${policy.heavyDamage?.toInt()}%";
+                          break;
+                          
+                        case "Hủy đơn":
+                          pContent = "Chưa duyệt: Hoàn 100% | Đã duyệt: Không được hủy.";
+                          break;
+                          
+                        case "Mất sản phẩm":
+                          pContent = "Đền bù 100% giá trị sản phẩm";
+                          break;
+                          
+                        default:
+                          pContent = "Liên hệ chủ shop";
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.info_outline, size: 15, color: Colors.grey),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "$pName: $pContent",
+                                style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.3),
                               ),
-                            ],
-                          ),
-                        );
-                      }),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),

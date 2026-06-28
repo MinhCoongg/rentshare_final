@@ -73,7 +73,6 @@ class PaymentPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // 📝 KHỐI 2: TÓM TẮT CHI TIẾT TIỀN NONG ĐỒ ÁN
                   const Text("Chi tiết thanh toán", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
                   const SizedBox(height: 12),
                   Container(
@@ -84,7 +83,7 @@ class PaymentPage extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        // 🎯 Thay hết sang FormatUtils.formatMoney xịn mịn của ní
+      
                         _buildPriceRow("Tiền thuê (${checkoutVM.rentalDays} ngày)", rentalFeeTotal),
                         const SizedBox(height: 12),
                         _buildPriceRow("Tiền cọc (hoàn lại)", depositTotal),
@@ -105,7 +104,6 @@ class PaymentPage extends StatelessWidget {
                     ),
                   ),
 
-                  // 🚨 BẪY LỖI: Cảnh báo đỏ lòm nếu user không đủ tiền ví nội bộ
                   if (!isEnoughBalance)
                     Padding(
                       padding: const EdgeInsets.only(top: 16),

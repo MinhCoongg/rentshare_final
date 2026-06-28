@@ -165,7 +165,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         children: order.items.map((item) {
                           double price = double.tryParse(item.pricePerDay) ?? 0.0;
                           double itemTotal = price * order.rentalDays * item.quantity;
-
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 14),
                             child: Row(

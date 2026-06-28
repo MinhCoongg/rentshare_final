@@ -386,7 +386,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
   // }
   Widget _buildBottomAction(ProductModel item) {
     const themeColor = Color(0xFF0056D2);
-
     Future<void> handleAddToCart(bool isCheckout) async {
       final newItem = RentalCartItem(
         productId: item.id,
@@ -421,18 +420,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
           return; 
         }
       }
-
       if (!mounted) return;
         if (isCheckout) {
-          final cartItems = cartProvider.items;
+          await cartProvider.setCheckoutItem(newItem);
           Navigator.push(
             context, 
             MaterialPageRoute(
               builder: (context) => CheckoutPage(
-                product: cartItems.first,
-                shopAddress: cartItems.first.ownerAddress 
-                )
+                product: newItem, 
+                shopAddress: newItem.ownerAddress 
               )
+            )
           );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

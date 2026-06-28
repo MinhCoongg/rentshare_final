@@ -27,7 +27,7 @@ class RenterActionButton extends StatelessWidget {
           final bool isConfirm = await DifferentShopDialog.show(
             context: context,
             title: "Xác nhận hủy đơn",
-            content: "Bạn có chắc chắn muốn hủy đơn thuê này không? Tiền cọc giữ đồ sẽ được hoàn 100% về ví của bạn lập tức.",
+            content: "Bạn có chắc chắn muốn hủy đơn thuê này không?",
             actionButtonText: "Hủy đơn ngay",
           );
           if (isConfirm && context.mounted) {

@@ -71,7 +71,6 @@ class RentalOrderService {
           'Authorization': 'Bearer $token',
         },
       );
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedData = json.decode(response.body);
         if (decodedData['success'] == true && decodedData['data'] != null) {
@@ -137,19 +136,18 @@ class RentalOrderService {
   }
 
 
-  Future<bool> approveRentalRequest(int orderId) async {
+  Future<bool> approveRentalRequest(int orderId, List<Map<String, dynamic>> rejectedItems) async {
     try {
       final String token = await SharedPrefsUtils.getToken();
       final response = await http.post(
         Uri.parse('${ConstantURL.baseUrl}/rental/approve-request'), 
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({'rentalRequestId': orderId}),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        body: json.encode({
+          'rentalRequestId': orderId,
+          'rejectedItems': rejectedItems, 
+        }),
       );
-      final Map<String, dynamic> data = json.decode(response.body);
-      return response.statusCode == 200 && data['success'] == true;
+      return response.statusCode == 200;
     } catch (e) {
       return false;
     }

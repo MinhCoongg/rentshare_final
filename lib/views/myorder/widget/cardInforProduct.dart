@@ -187,7 +187,7 @@ class RentalOrderCard extends StatelessWidget {
                       children: [
                         Text(
                           order.status == 'Pending'
-                              ? "${FormatUtils.formatMoney(order.depositFee)} đ" // Bản Chờ duyệt show đúng 2.5 triệu cọc
+                              ? "${FormatUtils.formatMoney(order.depositFee)} đ" 
                               : "${FormatUtils.formatMoney(order.totalAmount)} đ",
                           style: const TextStyle(color: Color(0xFFE07A5F), fontWeight: FontWeight.bold, fontSize: 16),
                         ),

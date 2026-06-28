@@ -49,11 +49,16 @@ class PostProductModel {
       
      
       "policies": policies
-          .map((policy) => {
-                "type": policy.type, 
-                "content": policy.content,
-              })
-          .toList(),
+        .map((policy) => {
+          "type": policy.type,
+          "fineValue": policy.fineValue,
+          "unit": policy.unit,
+          "content": policy.content,
+          "lightDamage": policy.lightDamage,
+          "mediumDamage": policy.mediumDamage,
+          "heavyDamage": policy.heavyDamage,
+        })
+        .toList(),
     };
   }
   

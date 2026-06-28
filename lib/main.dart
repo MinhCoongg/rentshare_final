@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rentshare_app/viewmodels/address_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/addresses_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
-import 'package:rentshare_app/viewmodels/home_viewmodel.dart'; 
+import 'package:rentshare_app/viewmodels/home_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/login_viewmodel.dart'; 
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/productFilter.dart';
 import 'package:rentshare_app/viewmodels/product_detail_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
-import 'package:rentshare_app/views/checkRentalProduct/widget/show.dart';
 import 'package:rentshare_app/views/home_product/homeProduct.dart';
 import 'package:rentshare_app/views/login/login.dart';
+import 'package:rentshare_app/views/mainscreen.dart';
 import 'package:rentshare_app/views/myorder/myorder.dart';
 import 'package:rentshare_app/views/owner/list_rental_product_screen.dart';
 import 'package:rentshare_app/views/owner/owner_rental_management_screen.dart';
 import 'package:rentshare_app/views/post_product.dart/post_product_screen.dart';
-import 'package:rentshare_app/views/product_detail.dart/product_detail_screen.dart';
+import 'package:rentshare_app/views/profile/profile.dart';
 import 'package:rentshare_app/views/rentalOrderDetail/rentelDetalProduct.dart';
 
 void main() {
@@ -28,6 +31,10 @@ void main() {
         ChangeNotifierProvider(create: (_) => CheckoutViewModel()),
         ChangeNotifierProvider(create: (_) => AddressViewModel()),
         ChangeNotifierProvider(create: (_) => RentalOrderViewModel()),
+        ChangeNotifierProvider(create: (_) => ProductListViewModel()),
+        ChangeNotifierProvider(create: (_) => LoginViewModel()),
+        ChangeNotifierProvider(create: (_) => AddressSelectionViewModel()),
+
 
       ],
       child: const MainApp(),
@@ -45,15 +52,15 @@ class MainApp extends StatelessWidget {
       title: 'RentShare App',
       initialRoute: '/login',
       theme: ThemeData(primarySwatch: Colors.blue),
-      //home: ReportSuccessScreen(),
+      //home: HomePage(),
       routes: {
         '/login': (context) => const LoginView(),
         '/home': (context) => const HomePage(), 
         '/post_product': (context) => const PostProductScreen(), 
-        '/product_detail' : (context) => const ProductDetailPage(productId: 4),
         '/my-order' : (context) => const MyRentalsScreen(),
         '/owner-orders-list': (context) => const OwnerRentalListScreen(),
-
+        '/profile' : (context) => const ProfileScreen(),
+        '/mainscreen' : (context) => const MainScreen()
       },
       onGenerateRoute: (RouteSettings settings) {
         if (settings.name == '/rental-detail') {

@@ -95,6 +95,7 @@ class OrderDetailItem {
     required this.image,
     required this.depositAmount,
     required this.pricePerDay,
+
   });
 
   factory OrderDetailItem.fromJson(Map<String, dynamic> json) {

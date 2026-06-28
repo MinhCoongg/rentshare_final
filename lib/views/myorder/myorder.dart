@@ -34,9 +34,10 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
         _fetchOrders();
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleInitialStatus();
+    });
 
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => _fetchOrders());
   }
 
   void _fetchOrders() {
@@ -44,6 +45,18 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
     context.read<RentalOrderViewModel>().loadMyOrders(
           status: currentStatus,
         );
+  }
+
+  void _handleInitialStatus() {
+    final String? initialStatus = ModalRoute.of(context)?.settings.arguments as String?;
+    
+    if (initialStatus != null && initialStatus.isNotEmpty) {
+      int index = _tabs.indexWhere((tab) => tab['status'] == initialStatus);
+      if (index != -1) {
+        _tabController.index = index;
+      }
+    }
+    _fetchOrders();
   }
 
   @override
@@ -124,7 +137,6 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
                 order: order,
                 onDetailPressed: () async {
                   if (order.status == 'Inspecting') {
-                    // Không cần fetch ở đây nữa, đẩy qua màn hình cho màn hình đó tự fetch
                     Navigator.of(context, rootNavigator: true).push(
                       MaterialPageRoute(
                         builder: (_) => ChiTietBaoCaoScreen(
@@ -138,7 +150,7 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
                   }
                 },
                 onContactPressed: () {
-                  // Logic chat chẹt mở cuộc hội thoại
+                  // Logic chat 
                 },
               );
             },

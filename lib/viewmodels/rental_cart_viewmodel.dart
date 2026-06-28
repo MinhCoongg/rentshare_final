@@ -54,6 +54,14 @@ class RentalCartProvider extends ChangeNotifier {
     return 'SUCCESS';
   }
 
+  Future<void> setCheckoutItem(RentalCartItem item) async {
+    _items.clear();
+    item.quantity = 1; 
+    _items.add(item);
+    await saveCartToStorage();
+    notifyListeners();
+  }
+
 
   Future<void> clearAndAddNewProduct(RentalCartItem item) async {
     _items.clear();

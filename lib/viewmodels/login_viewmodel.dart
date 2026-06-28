@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rentshare_app/utils/sharetoken_utils.dart';
-import 'package:shared_preferences/shared_preferences.dart'; 
+import 'package:rentshare_app/utils/sharetoken_utils.dart'; 
 import 'package:rentshare_app/models/login_model.dart';
 import 'package:rentshare_app/models/user_model.dart';
 import 'package:rentshare_app/services/login_services.dart';
@@ -35,30 +34,43 @@ class LoginViewModel extends ChangeNotifier {
   Future<String?> loginWithApi() async {
     _isLoading = true;
     notifyListeners();
+    
     final result = await LoginServices.login(_loginData.email, _loginData.password);
+    
     _isLoading = false;
     notifyListeners();
-    
+
     if (result['succeeded'] == true) {
       _currentUser = result['user'] as UserModel;
       _token = result['token'] ?? '';
       await SharedPrefsUtils.saveToken(_token);
-    
+      await SharedPrefsUtils.saveUser(_currentUser!); 
       
-
-      return null; 
+      notifyListeners();
+      return null;
     } else {
-      return result['message']; 
+      return result['message'];
     }
   }
 
   Future<bool> checkLoggedInStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedToken = prefs.getString('user_token');
-    if (savedToken != null && savedToken.isNotEmpty) {
+    final savedToken = await SharedPrefsUtils.getToken();
+    if (savedToken.isNotEmpty) {
       _token = savedToken;
-      return true; 
+      final savedUser = await SharedPrefsUtils.getUser();
+      if (savedUser != null) {
+        _currentUser = savedUser;
+        notifyListeners(); 
+        return true;
+      }
     }
     return false;
+  }
+
+  Future<void> logout() async {
+    await SharedPrefsUtils.clearAll(); 
+    _currentUser = null;
+    _token = '';
+    notifyListeners();
   }
 }

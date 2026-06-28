@@ -63,4 +63,58 @@ class AddressService {
       throw Exception("Không thể kết nối đến máy chủ: $error");
     }
   }
+
+  static Future<bool> updateAddress(AddressModel address) async {
+    final url = Uri.parse("${ConstantURL.baseUrl}/update-address/${address.id}");
+    final String jwtToken = await SharedPrefsUtils.getToken();
+    
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $jwtToken",
+        },
+        body: json.encode({
+          "receiverName": address.receiverName,
+          "receiverPhone": address.receiverPhone,
+          "fullAddress": address.fullAddress,
+          "isDefault": address.isDefault,
+        }),
+      );
+
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return true;
+      } else {
+        throw Exception(responseData['message'] ?? "Cập nhật địa chỉ thất bại!");
+      }
+    } catch (error) {
+      throw Exception("Không thể kết nối đến máy chủ: $error");
+    }
+  }
+
+  static Future<bool> deleteAddress(int id) async {
+    final url = Uri.parse("${ConstantURL.baseUrl}/delete-address/$id");
+    final String jwtToken = await SharedPrefsUtils.getToken();
+    
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $jwtToken",
+        },
+      );
+
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return true;
+      } else {
+        throw Exception(responseData['message'] ?? "Xóa địa chỉ thất bại!");
+      }
+    } catch (error) {
+      throw Exception("Không thể kết nối đến máy chủ: $error");
+    }
+  }
 }

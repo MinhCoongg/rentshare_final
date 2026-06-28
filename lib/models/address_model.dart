@@ -32,4 +32,20 @@ class AddressModel {
       "isDefault": isDefault ? 1 : 0,
     };
   }
+
+  AddressModel copyWith({
+    int? id,
+    String? receiverName,
+    String? receiverPhone,
+    String? fullAddress,
+    bool? isDefault,
+  }) {
+    return AddressModel(
+      id: id ?? this.id,
+      receiverName: receiverName ?? this.receiverName,
+      receiverPhone: receiverPhone ?? this.receiverPhone,
+      fullAddress: fullAddress ?? this.fullAddress,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
 }
