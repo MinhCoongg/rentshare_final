@@ -155,7 +155,7 @@ class _LoginViewState extends State<LoginView> {
                                 ? null
                                 : () async {
                                     if (_formKey.currentState!.validate()) {
-                                      String? errorMessage = await viewModel.loginWithApi();
+                                      String? errorMessage = await viewModel.loginWithApi(context);
                                       if (context.mounted) {
                                         if (errorMessage == null) {
                                           ScaffoldMessenger.of(context).showSnackBar(

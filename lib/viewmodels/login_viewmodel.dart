@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rentshare_app/utils/sharetoken_utils.dart'; 
 import 'package:rentshare_app/models/login_model.dart';
 import 'package:rentshare_app/models/user_model.dart';
 import 'package:rentshare_app/services/login_services.dart';
+import 'package:rentshare_app/viewmodels/auth_viewmodel.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final LoginModel _loginData = LoginModel();
@@ -31,7 +33,7 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String?> loginWithApi() async {
+  Future<String?> loginWithApi(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
     
@@ -41,15 +43,18 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     if (result['succeeded'] == true) {
-      _currentUser = result['user'] as UserModel;
-      _token = result['token'] ?? '';
-      await SharedPrefsUtils.saveToken(_token);
-      await SharedPrefsUtils.saveUser(_currentUser!); 
+      final String token = result['token'] ?? '';
+      final UserModel user = result['user'] as UserModel; 
+      if (context.mounted) {
+        await context.read<AuthProvider>().saveAuth(token, user);
+      }
+
+      _currentUser = user;
+      _token = token;
       
-      notifyListeners();
-      return null;
+      return null; 
     } else {
-      return result['message'];
+      return result['message']; 
     }
   }
 

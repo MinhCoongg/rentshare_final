@@ -4,7 +4,6 @@ import 'package:rentshare_app/models/damageReport.dart';
 import 'package:rentshare_app/models/policy_model.dart';
 import 'package:rentshare_app/models/productSelection.dart';
 import 'package:rentshare_app/models/rentalOrderDetail.dart';
-import 'package:rentshare_app/models/rentalOrderItem.dart'; 
 import 'package:rentshare_app/services/rental_order_service.dart';
 
 
@@ -13,15 +12,15 @@ class RentalOrderViewModel extends ChangeNotifier {
   
   bool _isLoading = false;
   String _errorMessage = '';
-  List<RentalOrderModel> _myOrders = [];   
-  List<RentalOrderModel> _ownerOrders = [];                     
+  List<RentalOrderDetailModel> _myOrders = [];   
+  List<RentalOrderDetailModel> _ownerOrders = [];                     
   RentalOrderDetailModel? _currentOrder;              
   DamageReport? _damageReport;
 
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
-  List<RentalOrderModel> get myOrders => _myOrders;
-  List<RentalOrderModel> get ownerOrders => _ownerOrders;
+  List<RentalOrderDetailModel> get myOrders => _myOrders;
+  List<RentalOrderDetailModel> get ownerOrders => _ownerOrders;
   RentalOrderDetailModel? get currentOrder => _currentOrder;
   DamageReport? get damageReport => _damageReport;
   Map<int, ProductSelectionState> selectedProducts = {};

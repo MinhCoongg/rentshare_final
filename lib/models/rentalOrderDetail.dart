@@ -81,31 +81,40 @@ class RentalOrderDetailModel {
 }
 
 class OrderDetailItem {
+  final int idInvoiceDetail;
   final int productId;
   final int quantity;
   final String title;
   final String image;
   final String depositAmount;
   final String pricePerDay;
+  final bool isReviewed;
+
 
   OrderDetailItem({
+    required this.idInvoiceDetail,
     required this.productId,
     required this.quantity,
     required this.title,
     required this.image,
     required this.depositAmount,
     required this.pricePerDay,
+    required this.isReviewed
+    
 
   });
 
   factory OrderDetailItem.fromJson(Map<String, dynamic> json) {
     return OrderDetailItem(
+      idInvoiceDetail: json['invoiceDetailId'] ?? 0,
       productId: json['productId'] ?? 0,
       quantity: json['quantity'] ?? 0,
       title: json['title'] ?? '',
       image: json['image'] ?? '',
       depositAmount: json['depositAmount'] ?? '0.00',
       pricePerDay: json['pricePerDay'] ?? '0.00',
+       isReviewed: json['isReviewed'] == 1,
+      
     );
   }
 }

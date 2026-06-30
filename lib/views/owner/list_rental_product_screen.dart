@@ -140,12 +140,12 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
           final int totalOrders = viewModel.ownerOrders.length; 
           double totalRevenue = 0;
           for (var order in viewModel.ownerOrders) {
-            totalRevenue += order.rentalFee; 
+            double fee = double.tryParse(order.rentalFee) ?? 0.0;
+            totalRevenue += fee;
           }
 
           return Column(
             children: [
-              // 📊 Card Tím Tổng Quan
               Container(
                 margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(16),
@@ -243,7 +243,7 @@ class _OwnerRentalListScreenState extends State<OwnerRentalListScreen> with Sing
                                     // Body info (Gọn gàng hơn)
                                     _buildInfoRow(Icons.person_outline, "Khách:", order.receiverName),
                                     const SizedBox(height: 8),
-                                    _buildInfoRow(Icons.calendar_today_outlined, "Thời gian:", "${order.startDate} - ${order.endDate}"),
+                                    _buildInfoRow(Icons.calendar_today_outlined, "Thời gian:", "${order.startDateFormatted} - ${order.endDateFormatted}"),
                                     
                                     const Divider(height: 24, thickness: 1, color: Color(0xFFF3F4F6)),
                                     

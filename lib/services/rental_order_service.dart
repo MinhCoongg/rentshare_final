@@ -6,12 +6,11 @@ import 'package:rentshare_app/constant/constant_url.dart';
 import 'package:rentshare_app/models/damageReport.dart';
 import 'package:rentshare_app/models/policy_model.dart';
 import 'package:rentshare_app/models/rentalOrderDetail.dart';
-import 'package:rentshare_app/models/rentalOrderItem.dart';
 import 'package:rentshare_app/utils/sharetoken_utils.dart';
 
 
 class RentalOrderService {
-  Future<List<RentalOrderModel>> fetchMyOrders({String? status}) async {
+  Future<List<RentalOrderDetailModel>> fetchMyOrders({String? status}) async {
     try {
       final String token = await SharedPrefsUtils.getToken();
       String url = '${ConstantURL.baseUrl}/rental/my-orders'; 
@@ -25,7 +24,7 @@ class RentalOrderService {
         final Map<String, dynamic> resData = jsonDecode(response.body);
         if (resData['success'] == true) {
           final List listData = resData['data'] ?? [];
-          return listData.map((e) => RentalOrderModel.fromJson(e)).toList();
+          return listData.map((e) => RentalOrderDetailModel.fromJson(e)).toList();
         }
       }
       return [];
@@ -35,7 +34,7 @@ class RentalOrderService {
   }
 
 
-  Future<RentalOrderModel?> fetchOrderDetailById({
+  Future<RentalOrderDetailModel?> fetchOrderDetailById({
     required int orderId, 
   }) async {
     try {
@@ -51,7 +50,7 @@ class RentalOrderService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> resData = jsonDecode(response.body);
         if (resData['success'] == true && resData['data'] != null) {
-          return RentalOrderModel.fromJson(resData['data']);
+          return RentalOrderDetailModel.fromJson(resData['data']);
         }
       }
       return null;
@@ -175,7 +174,7 @@ class RentalOrderService {
     }
   }
 
-  Future<List<RentalOrderModel>> fetchOwnerOrders({String? status}) async {
+  Future<List<RentalOrderDetailModel>> fetchOwnerOrders({String? status}) async {
     try {
       final String token = await SharedPrefsUtils.getToken();
       String url = '${ConstantURL.baseUrl}/rental/my-orders?role=owner'; 
@@ -189,7 +188,7 @@ class RentalOrderService {
         final Map<String, dynamic> resData = jsonDecode(response.body);
         if (resData['success'] == true) {
           final List listData = resData['data'] ?? [];
-          return listData.map((e) => RentalOrderModel.fromJson(e)).toList();
+          return listData.map((e) => RentalOrderDetailModel.fromJson(e)).toList();
         }
       }
       return [];

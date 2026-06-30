@@ -20,6 +20,8 @@ class UserModel {
   final String role;
   final String avatar;
   final WalletModel wallet;
+  final String? address; 
+  final String? phoneNumber;
 
   UserModel({
     required this.id,
@@ -28,6 +30,8 @@ class UserModel {
     required this.role,
     required this.avatar,
     required this.wallet,
+    this.address,     
+    this.phoneNumber, 
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +42,8 @@ class UserModel {
       role: json['role'] ?? '',
       avatar: json['avatar'] ?? '',
       wallet: WalletModel.fromJson(json['wallet'] ?? {'balance': '0.0'}),
+      address: json['address'], 
+      phoneNumber: json['phoneNumber'],
     );
   }
 
@@ -48,7 +54,31 @@ class UserModel {
       'email': email,
       'role': role,
       'avatar': avatar,
-      'wallet': wallet.toJson(), 
+      'wallet': wallet.toJson(),
+      'address': address,       
+      'phoneNumber': phoneNumber, 
     };
+  }
+
+  UserModel copyWith({
+    int? id,
+    String? name,
+    String? email,
+    String? role,
+    String? avatar,
+    WalletModel? wallet,
+    String? diaChi,
+    String? phoneNumber,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      avatar: avatar ?? this.avatar,
+      wallet: wallet ?? this.wallet,
+      address: address ?? this.address,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+    );
   }
 }

@@ -145,7 +145,9 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
                         ),
                       ),
                     );
-                  } else {
+                  } 
+
+                  else {
                     Navigator.of(context, rootNavigator: true).pushNamed('/rental-detail', arguments: order.id);
                   }
                 },

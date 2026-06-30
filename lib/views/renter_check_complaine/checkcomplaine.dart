@@ -74,7 +74,19 @@ class _ChiTietBaoCaoScreenState extends State<ChiTietBaoCaoScreen> {
                   const SizedBox(height: 8),
                   Text(report.ownerNote, style: const TextStyle(fontSize: 14)),
                   const SizedBox(height: 12),
-                  ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network('http://192.168.1.17:3001${report.evidence}', height: 150, width: double.infinity, fit: BoxFit.cover)),
+                  if (report.evidence != null && report.evidence.isNotEmpty) 
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8), 
+                      child: Image.network(
+                        'http://192.168.1.17:3001${report.evidence}', 
+                        height: 150, 
+                        width: double.infinity, 
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const SizedBox();
+                        },
+                      )
+                    ),
                 ]),
 
                 _buildSection("Chi tiết phí phát sinh", [

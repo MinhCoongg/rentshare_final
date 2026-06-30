@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/models/user_model.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
+import 'package:rentshare_app/viewmodels/auth_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/home_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/login_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/views/addUpdateAddress/address.dart';
+import 'package:rentshare_app/views/editprofile/editprofile.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,10 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final loginVm = context.read<LoginViewModel>();
-      if (loginVm.currentUser == null) {
-        await loginVm.checkLoggedInStatus();
-      }
+      context.read<AuthProvider>().loadAuthData();
       context.read<RentalOrderViewModel>().loadMyOrders();
     });
   }
@@ -30,8 +29,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loginVm = context.watch<LoginViewModel>();
-    final user = loginVm.currentUser;
+    final auth = context.watch<AuthProvider>();
+    final user = auth.user;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -69,10 +68,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: ()async{
-                  await loginVm.logout();
-                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-                },
+               onPressed: () async {
+                  await context.read<AuthProvider>().logout();
+                  if (mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/login',
+                      (route) => false,
+                    );
+                  }
+              },
                 child: const Text("Đăng xuất", style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
@@ -92,9 +97,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           CircleAvatar(
             radius: 30,
             backgroundColor: Colors.grey[200], 
-            backgroundImage: (user?.avatar != null && user!.avatar.isNotEmpty)
-                ? NetworkImage('http://192.168.1.17:3001${user.avatar}')
-                : null, 
+            backgroundImage:
+              (user?.avatar != null && user!.avatar.isNotEmpty)
+                  ? NetworkImage(
+                      "http://192.168.1.17:3001${user.avatar}",
+                    )
+                  : null, 
             child: (user?.avatar == null || user!.avatar.isEmpty)
                 ? const Icon(Icons.person, size: 40, color: Colors.grey) 
                 : null,
@@ -242,7 +250,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             }
           ),
-          _buildMenuItem(Icons.payment_outlined, "Phương thức thanh toán", "Tài khoản và thẻ ngân hàng", () {}),
+          _buildMenuItem(
+            Icons.payment_outlined, 
+            "Thông tin cá nhân", 
+            "Chỉnh sửa thông tin cá nhân", 
+            () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+              );
+            }
+          ),
         ],
       ),
     );
