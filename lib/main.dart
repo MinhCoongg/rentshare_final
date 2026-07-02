@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/product_detail_viewmodel.dart';
+import 'package:rentshare_app/views/catalog/catalog.dart';
 import 'package:rentshare_app/views/post_product.dart/post_product_screen.dart';
-
-
-
+import 'package:rentshare_app/views/login/register.dart';
+import 'package:rentshare_app/views/login/login.dart';
 
 void main() {
   runApp(
@@ -13,7 +13,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PostProductViewModel()),
-        ChangeNotifierProvider(create: (_) => ProductDetailViewModel()) 
+        ChangeNotifierProvider(create: (_) => ProductDetailViewModel()),
       ],
       child: const MainApp(),
     ),
@@ -29,7 +29,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'RentShare App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home:  PostProductScreen(),
+      home: CampingProductListScreen(),
     );
   }
 }

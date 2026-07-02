@@ -1,3 +1,4 @@
-class ConstantURL{
-  static const String baseUrl = "http://192.168.1.9:3001/api";
+class ConstantURL {
+  static const String baseUrl = 'http://localhost:3001/api';
+  static const String registerUrl = "$baseUrl/register";
 }

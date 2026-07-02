@@ -6,6 +6,7 @@ import 'package:rentshare_app/models/login_model.dart';
 import 'package:rentshare_app/models/user_model.dart';
 import 'package:rentshare_app/services/login_services.dart';
 
+
 class LoginViewModel extends ChangeNotifier {
   final LoginModel _loginData = LoginModel();
   bool _isLoading = false;
