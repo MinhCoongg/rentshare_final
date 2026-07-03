@@ -22,11 +22,10 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
   @override
   void initState() {
     super.initState();
-    // Nếu có editAddress (chế độ sửa), đổ dữ liệu cũ vào form
     if (widget.editAddress != null) {
-      _name.text = widget.editAddress!.receiverName ?? "";
-      _phone.text = widget.editAddress!.receiverPhone ?? "";
-      _addr.text = widget.editAddress!.fullAddress ?? "";
+      _name.text = widget.editAddress!.receiverName;
+      _phone.text = widget.editAddress!.receiverPhone;
+      _addr.text = widget.editAddress!.fullAddress;
       _isDefault = widget.editAddress!.isDefault;
     }
   }

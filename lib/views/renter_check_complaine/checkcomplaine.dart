@@ -66,7 +66,7 @@ class _ChiTietBaoCaoScreenState extends State<ChiTietBaoCaoScreen> {
                     ]),
                   )).toList(),
                   const Divider(),
-                  Text("${widget.order.startDate} - ${widget.order.endDate}", style: TextStyle(color: Colors.grey[600])),
+                  Text("${widget.order.startDateFormatted} - ${widget.order.endDateFormatted}", style: TextStyle(color: Colors.grey[600])),
                 ]),
 
                 _buildSection("Kết quả nghiệm thu từ shop", [
@@ -92,16 +92,15 @@ class _ChiTietBaoCaoScreenState extends State<ChiTietBaoCaoScreen> {
                 _buildSection("Chi tiết phí phát sinh", [
                 _rowPrice("Tiền cọc ban đầu", widget.order.depositFee.toString()),
                 
-                // 2. Các khoản trừ
+  
                 _rowPrice("Tiền thuê sản phẩm", "- ${widget.order.rentalFee.toString()}", color: Colors.red[700]),
                 _rowPrice("Phí đền bù hư hỏng", "- ${report.compensationAmount.toString()}", color: Colors.red[700]),
                 
                 const Divider(thickness: 1, height: 24),
                 
-                // 3. Số tiền cọc còn lại hoàn cho khách
                 _rowPrice(
                   "Số tiền hoàn lại cọc", 
-                  (widget.order.depositFee - widget.order.rentalFee - report.compensationAmount).toString(), 
+                  (double.parse(widget.order.depositFee) - double.parse(widget.order.rentalFee) - report.compensationAmount - double.parse(widget.order.shippingFee)).toString(), 
                   isTotal: true
                 ),
               ]),

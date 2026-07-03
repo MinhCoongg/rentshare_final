@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/address_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/addresses_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/auth_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/chat_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/home_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/login_viewmodel.dart'; 
@@ -12,6 +13,9 @@ import 'package:rentshare_app/viewmodels/product_detail_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/review_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/shop_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/wallet_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/wishlist_viewmodel.dart';
 import 'package:rentshare_app/views/home_product/homeProduct.dart';
 import 'package:rentshare_app/views/login/login.dart';
 import 'package:rentshare_app/views/mainscreen.dart';
@@ -38,6 +42,11 @@ void main() {
         ChangeNotifierProvider(create: (_) => AddressSelectionViewModel()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
+        ChangeNotifierProvider(create: (_) => WalletViewModel()),
+        ChangeNotifierProvider(create: (_) => ShopViewModel()),
+        ChangeNotifierProvider(create: (_) => ChatViewModel()),
+        
 
 
       ],

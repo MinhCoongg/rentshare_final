@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/models/user_model.dart';
+import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/auth_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/home_viewmodel.dart';
-import 'package:rentshare_app/viewmodels/login_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/wallet_viewmodel.dart';
 import 'package:rentshare_app/views/addUpdateAddress/address.dart';
 import 'package:rentshare_app/views/editprofile/editprofile.dart';
+import 'package:rentshare_app/views/shop/ownerProductManager.dart';
+import 'package:rentshare_app/views/wallet/deposit_wallet.dart';
+import 'package:rentshare_app/views/wishlist/wishlist_product.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -23,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<AuthProvider>().loadAuthData();
       context.read<RentalOrderViewModel>().loadMyOrders();
+      Provider.of<WalletViewModel>(context, listen: false).fetchWallet();
     });
   }
   
@@ -68,15 +73,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-               onPressed: () async {
-                  await context.read<AuthProvider>().logout();
-                  if (mounted) {
+              onPressed: () async {
+                final bool shouldLogout = await DifferentShopDialog.show(
+                  context: context,
+                  title: "Đăng xuất",
+                  content: "Bạn có chắc chắn muốn thoát khỏi tài khoản không?",
+                  actionButtonText: "Đăng xuất",
+                );
+                if (shouldLogout) {
+                  await context.read<AuthProvider>().logout(context);
+                  if (context.mounted) {
                     Navigator.pushNamedAndRemoveUntil(
                       context,
                       '/login',
                       (route) => false,
                     );
                   }
+                }
               },
                 child: const Text("Đăng xuất", style: TextStyle(fontWeight: FontWeight.bold)),
               ),
@@ -131,10 +144,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Text("Ví của tôi", style: TextStyle(fontWeight: FontWeight.bold)),
-            Text("${FormatUtils.formatMoney(user?.wallet.balance ?? 0)}đ", 
-              style: const TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold)),
+            Consumer<WalletViewModel>(
+              builder: (context, walletVM, child) {
+                return Text(
+                  "${FormatUtils.formatMoney(walletVM.walletData?.balance ?? 0)}đ", 
+                  style: const TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold)
+                );
+              },
+            ),
           ]),
-          OutlinedButton(onPressed: () {}, child: const Text("Nạp tiền")),
+          OutlinedButton(onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DepositScreen()),
+            );
+          }, child: const Text("Nạp tiền")),
         ],
       ),
     );
@@ -204,7 +228,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
-          _buildMenuItem(Icons.inventory_outlined, "Sản phẩm của tôi", "Quản lý sản phẩm cho thuê", () {}),
+          _buildMenuItem(
+            Icons.inventory_outlined,
+            "Sản phẩm của tôi",
+            "Quản lý sản phẩm cho thuê",
+            () async {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xFF1B8A4B))),
+              );
+              final hasProduct = await context.read<HomeViewModel>().hasAnyProduct();        
+              // Tắt loading
+              Navigator.pop(context);
+              if (hasProduct) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const OwnerProductPage()),
+                );
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Bạn chưa có sản phẩm"),
+                    content: const Text("Hãy đăng sản phẩm đầu tiên của ní để bắt đầu quản lý nhé!"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Hủy", style: TextStyle(color: Colors.grey)),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1B8A4B)),
+                        onPressed: () {
+                          Navigator.pop(context); 
+                          Navigator.pushNamed(context, '/post_product'); 
+                        },
+                        child: const Text("Đăng sản phẩm ngay"),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            }
+          ),
           _buildMenuItem(
             Icons.verified_user_outlined, 
             "Duyệt sản phẩm", 
@@ -258,6 +324,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.push(
                 context, 
                 MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+              );
+            }
+          ),
+          _buildMenuItem(
+            Icons.favorite_border_rounded, 
+            "Sản phẩm yêu thích", 
+            "Danh sách sản phẩm bạn đã lưu", 
+            () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const WishlistScreen()), // Ní push qua màn hình Wishlist vừa tạo
               );
             }
           ),

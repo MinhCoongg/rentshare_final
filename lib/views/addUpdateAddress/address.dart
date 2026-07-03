@@ -98,7 +98,6 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                   ),
                 ],
               ),
-              // 2. Nội dung địa chỉ
               Text(addr.receiverName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 4),
               Text(addr.receiverPhone),

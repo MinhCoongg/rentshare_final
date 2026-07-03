@@ -45,37 +45,37 @@ class ReportSuccessScreen extends StatelessWidget {
               ),
               const Spacer(),
               
-              // 1. Chỉ giữ lại 1 nút duy nhất này thôi
-SizedBox(
-  width: double.infinity,
-  child: ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF4361EE), 
-      padding: const EdgeInsets.symmetric(vertical: 16)
-    ),
-    onPressed: () {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const OwnerRentalListScreen(), 
-        ),
-        (route) => route.isFirst, 
-      );
-      },
-      child: const Text("Xem danh sách đơn nghiệm thu", 
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-      ),
-              
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _infoLine(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: 8.0),
-    child: Row(children: [const Icon(Icons.info_outline, size: 16, color: Colors.grey), const SizedBox(width: 8), Expanded(child: Text(text, style: const TextStyle(fontSize: 12)))]),
-  );
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4361EE), 
+                    padding: const EdgeInsets.symmetric(vertical: 16)
+                  ),
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const OwnerRentalListScreen(), 
+                      ),
+                      (route) => route.isFirst, 
+                    );
+                    },
+                    child: const Text("Xem danh sách đơn nghiệm thu", 
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                            
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                Widget _infoLine(String text) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(children: [const Icon(Icons.info_outline, size: 16, color: Colors.grey), const SizedBox(width: 8), Expanded(child: Text(text, style: const TextStyle(fontSize: 12)))]),
+                );
 }

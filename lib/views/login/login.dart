@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/login_viewmodel.dart';
+import 'package:rentshare_app/views/login/register.dart';
 
 
 class LoginView extends StatefulWidget {
@@ -130,7 +131,6 @@ class _LoginViewState extends State<LoginView> {
                           ),
                         ),
                         
-                        // QUÊN MẬT KHẨU
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -237,7 +237,12 @@ class _LoginViewState extends State<LoginView> {
                           children: [
                             const Text('Chưa có tài khoản? ', style: TextStyle(color: Colors.grey)),
                             GestureDetector(
-                              onTap: () {}, // Nối sang trang Đăng Ký tiếp theo
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const RegisterPage()),
+                                );
+                              },
                               child: const Text(
                                 'Đăng ký ngay',
                                 style: TextStyle(color: Color(0xff1B8A4B), fontWeight: FontWeight.bold),

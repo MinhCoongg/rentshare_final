@@ -9,6 +9,7 @@ import 'package:rentshare_app/views/cartpage/cart.dart';
 import 'package:rentshare_app/views/checkout_page/checkout.dart'; 
 import 'package:rentshare_app/views/post_product.dart/widgets/prolicies_detail_tab.dart';
 import 'package:rentshare_app/views/product_detail.dart/widget/detailProductTab.dart';
+import 'package:rentshare_app/views/product_detail.dart/widget/review.dart';
 import '../../viewmodels/product_detail_viewmodel.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -74,7 +75,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
                     controller: _tabController,
                     children: [
                       DetailTab(item: item),
-                      _buildReviewTab(item),     
+                      ReviewTab(reviews: item.reviews), 
                       PolicyTab(item: item), 
                     ],
                   ),
@@ -98,12 +99,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
         padding: const EdgeInsets.only(left: 8.0),
         child: _circleBtn(Icons.arrow_back_ios_new, () => Navigator.pop(context)),
       ),
-      actions: [
-        _circleBtn(Icons.favorite_border, () {}),
-        const SizedBox(width: 10),
-        _circleBtn(Icons.share_outlined, () {}),
-        const SizedBox(width: 15),
-      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           fit: StackFit.expand,
@@ -169,91 +164,91 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
 
   
 
-  Widget _buildReviewTab(ProductModel item) {
-    if (item.reviews.isEmpty) {
-      return const Center(child: Text("Sản phẩm chưa có lượt đánh giá nào.", style: TextStyle(color: Colors.grey)));
-    }
+  // Widget _buildReviewTab(ProductModel item) {
+  //   if (item.reviews.isEmpty) {
+  //     return const Center(child: Text("Sản phẩm chưa có lượt đánh giá nào.", style: TextStyle(color: Colors.grey)));
+  //   }
 
-    int total = item.reviews.length;
-    int star5 = item.reviews.where((r) => r.rating == 5).length;
-    int star4 = item.reviews.where((r) => r.rating == 4).length;
-    int star3 = item.reviews.where((r) => r.rating == 3).length;
-    int star2 = item.reviews.where((r) => r.rating == 2).length;
-    int star1 = item.reviews.where((r) => r.rating == 1).length;
+  //   int total = item.reviews.length;
+  //   int star5 = item.reviews.where((r) => r.rating == 5).length;
+  //   int star4 = item.reviews.where((r) => r.rating == 4).length;
+  //   int star3 = item.reviews.where((r) => r.rating == 3).length;
+  //   int star2 = item.reviews.where((r) => r.rating == 2).length;
+  //   int star1 = item.reviews.where((r) => r.rating == 1).length;
 
-    double average = item.reviews.map((r) => r.rating).reduce((a, b) => a + b) / total;
+  //   double average = item.reviews.map((r) => r.rating).reduce((a, b) => a + b) / total;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Column(
-                children: [
-                  Text(average.toStringAsFixed(1), style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
-                  const Text("/5", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  const SizedBox(height: 4),
-                  Row(children: List.generate(5, (i) => Icon(Icons.star_rounded, color: i < average.floor() ? Colors.orange : Colors.grey[300], size: 14))),
-                ],
-              ),
-              const SizedBox(width: 30),
-              Expanded(
-                child: Column(
-                  children: [
-                    _ratingBar("5 sao", total > 0 ? star5 / total : 0),
-                    _ratingBar("4 sao", total > 0 ? star4 / total : 0),
-                    _ratingBar("3 sao", total > 0 ? star3 / total : 0),
-                    _ratingBar("2 sao", total > 0 ? star2 / total : 0),
-                    _ratingBar("1 sao", total > 0 ? star1 / total : 0),
-                  ],
-                ),
-              )
-            ],
-          ),
-          const Divider(height: 40, thickness: 0.5),
-          ...item.reviews.map((r) => _reviewItem(r)),
-        ],
-      ),
-    );
-  }
+  //   return SingleChildScrollView(
+  //     padding: const EdgeInsets.all(20),
+  //     child: Column(
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Column(
+  //               children: [
+  //                 Text(average.toStringAsFixed(1), style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
+  //                 const Text("/5", style: TextStyle(color: Colors.grey, fontSize: 12)),
+  //                 const SizedBox(height: 4),
+  //                 Row(children: List.generate(5, (i) => Icon(Icons.star_rounded, color: i < average.floor() ? Colors.orange : Colors.grey[300], size: 14))),
+  //               ],
+  //             ),
+  //             const SizedBox(width: 30),
+  //             Expanded(
+  //               child: Column(
+  //                 children: [
+  //                   _ratingBar("5 sao", total > 0 ? star5 / total : 0),
+  //                   _ratingBar("4 sao", total > 0 ? star4 / total : 0),
+  //                   _ratingBar("3 sao", total > 0 ? star3 / total : 0),
+  //                   _ratingBar("2 sao", total > 0 ? star2 / total : 0),
+  //                   _ratingBar("1 sao", total > 0 ? star1 / total : 0),
+  //                 ],
+  //               ),
+  //             )
+  //           ],
+  //         ),
+  //         const Divider(height: 40, thickness: 0.5),
+  //         ...item.reviews.map((r) => _reviewItem(r)),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _reviewItem(dynamic review) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, 
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 16, 
-              backgroundColor: Colors.grey[200],
-              backgroundImage: (review.userAvatar != null && review.userAvatar.isNotEmpty) ? NetworkImage(review.userAvatar) : null,
-              child: review.userAvatar == null ? const Icon(Icons.person, size: 16, color: Colors.grey) : null,
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(review.userName ?? "Người dùng ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
-                Row(
-                  children: List.generate(5, (i) => Icon(
-                    Icons.star_rounded, 
-                    color: i < (review.rating ?? 5) ? Colors.orange : Colors.grey[300], 
-                    size: 12
-                  )),
-                ),
-              ],
-            ),
-            const Spacer(),
-            const Text("2 ngày trước", style: TextStyle(color: Colors.grey, fontSize: 11)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(review.comment ?? "Sản phẩm dùng cực kỳ tốt!", style: const TextStyle(height: 1.4, fontSize: 13)),
-        const Divider(height: 30, thickness: 0.3),
-      ],
-    );
-  }
+  // Widget _reviewItem(dynamic review) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start, 
+  //     children: [
+  //       Row(
+  //         children: [
+  //           CircleAvatar(
+  //             radius: 16, 
+  //             backgroundColor: Colors.grey[200],
+  //             backgroundImage: (review.userAvatar != null && review.userAvatar.isNotEmpty) ? NetworkImage(review.userAvatar) : null,
+  //             child: review.userAvatar == null ? const Icon(Icons.person, size: 16, color: Colors.grey) : null,
+  //           ),
+  //           const SizedBox(width: 10),
+  //           Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(review.userName ?? "Người dùng ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+  //               Row(
+  //                 children: List.generate(5, (i) => Icon(
+  //                   Icons.star_rounded, 
+  //                   color: i < (review.rating ?? 5) ? Colors.orange : Colors.grey[300], 
+  //                   size: 12
+  //                 )),
+  //               ),
+  //             ],
+  //           ),
+  //           const Spacer(),
+  //           const Text("2 ngày trước", style: TextStyle(color: Colors.grey, fontSize: 11)),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 8),
+  //       Text(review.comment ?? "Sản phẩm dùng cực kỳ tốt!", style: const TextStyle(height: 1.4, fontSize: 13)),
+  //       const Divider(height: 30, thickness: 0.3),
+  //     ],
+  //   );
+  // }
 
 
   //   Widget _buildBottomAction(ProductModel item) {
@@ -493,7 +488,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> with TickerProvid
   }
 
   Widget _circleBtn(IconData i, VoidCallback t) => CircleAvatar(radius: 18, backgroundColor: Colors.white.withOpacity(0.9), child: IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(i, color: Colors.black, size: 18), onPressed: t));
-  Widget _ratingBar(String l, double v) => Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Row(children: [SizedBox(width: 38, child: Text(l, style: const TextStyle(fontSize: 11, color: Colors.grey))), const SizedBox(width: 4), Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(3), child: LinearProgressIndicator(value: v, backgroundColor: Colors.grey[100], color: const Color(0xFF0056D2), minHeight: 5)))]));
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {

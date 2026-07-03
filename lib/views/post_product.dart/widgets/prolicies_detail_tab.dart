@@ -141,7 +141,7 @@ class PolicyCard extends StatelessWidget {
   String _getPolicyExplanation(String type) {
     switch (type) {
       case "Hủy đơn":
-        return "Chưa duyệt: Hoàn 100% tiền cọc.\n• Đã duyệt: Không được hoàn tiền.";
+        return "Chưa duyệt: Hoàn 100% tiền cọc.\nĐã duyệt: Không được hoàn tiền.";
       case "Mất sản phẩm":
         return "Yêu cầu đền bù 100% giá trị sản phẩm theo hóa đơn mua mới tại thời điểm mất.";
       default:

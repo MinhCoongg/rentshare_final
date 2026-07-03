@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                 _buildSectionTitle("Sản phẩm nổi bật", themeColor),
                 _buildHorizontalProductList(vm.featuredProducts, themeColor),
 
-                _buildSectionTitle("Mới đăng hôm nay", themeColor),
+                _buildSectionTitle("Sản phẩm mới nhất", themeColor),
                 _buildHorizontalProductList(vm.newestProducts, themeColor),
 
                 _buildSectionTitle("Có thể bạn quan tâm", themeColor),

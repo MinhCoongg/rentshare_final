@@ -4,6 +4,7 @@ import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
 import 'package:rentshare_app/views/checkout_page/checkout.dart';
+import 'package:rentshare_app/views/shop/shopProduct.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -244,17 +245,35 @@ class CartPage extends StatelessWidget {
                             color: const Color(0xFFF0F4FF), 
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add_rounded, color: Color(0xFF0056D2), size: 16),
-                              SizedBox(width: 4),
-                              Text(
-                                "Thêm sản phẩm khác",
-                                style: TextStyle(color: Color(0xFF0056D2), fontWeight: FontWeight.bold, fontSize: 13),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ShopPage(shopId: cartItems[0].ownerId), 
+                                ),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.add_rounded, color: Color(0xFF0056D2), size: 16),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "Thêm sản phẩm khác",
+                                    style: TextStyle(
+                                      color: Color(0xFF0056D2), 
+                                      fontWeight: FontWeight.bold, 
+                                      fontSize: 13
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          )
                         ),
                       ),
                       const SizedBox(height: 20),

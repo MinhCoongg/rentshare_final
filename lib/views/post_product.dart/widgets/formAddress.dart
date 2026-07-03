@@ -61,7 +61,13 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                   hintText: "Nhập số điện thoại...",
                   hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
-                validator: (v) => v!.trim().isEmpty ? "Vui lòng điền số điện thoại" : null,
+                validator: (val) {
+                  if (val == null || val.isEmpty) return "Vui lòng nhập SĐT";
+                  if (!_isValidPhone(val)) {
+                    return "SĐT không hợp lệ (phải bắt đầu bằng số 0 và có 10 số)";
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -141,5 +147,10 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
         ),
       ],
     );
+  }
+
+  bool _isValidPhone(String phone) {
+    final phoneRegex = RegExp(r'^0[0-9]{9}$');
+    return phoneRegex.hasMatch(phone);
   }
 }

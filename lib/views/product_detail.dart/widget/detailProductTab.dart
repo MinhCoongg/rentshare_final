@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rentshare_app/models/product_model.dart';
-import 'package:rentshare_app/utils/format_utils.dart'; 
+import 'package:rentshare_app/services/chat_service.dart';
+import 'package:rentshare_app/utils/format_utils.dart';
+import 'package:rentshare_app/viewmodels/auth_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/chat_viewmodel.dart';
+import 'package:rentshare_app/views/chat/chat.dart'; 
 
 class DetailTab extends StatelessWidget {
   final ProductModel item;
@@ -65,7 +70,7 @@ class DetailTab extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)
             ),
             Text(
-              " • Đã thuê ${item.rentedCount} lần", 
+              " - Đã thuê ${item.rentedCount} lần", 
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: Colors.grey)
             ),
           ]),
@@ -129,7 +134,28 @@ class DetailTab extends StatelessWidget {
             ]),
             subtitle: const Text("Chủ shop Rentshare", style: TextStyle(color: Colors.grey, fontSize: 12)),
             trailing: OutlinedButton.icon(
-              onPressed: () {}, 
+              onPressed: () async{
+                final myId = Provider.of<AuthProvider>(context, listen: false).id ?? 0;
+                try{
+                  int convId = await ChatService.getOrCreateConversation( item.id, item.ownerId);
+                  if (context.mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            conversationId: convId, 
+                            myUserId: myId, 
+                            shopName: item.ownerName,
+                          ),
+                        ),
+                      ).then((val){
+                        Provider.of<ChatViewModel>(context, listen: false).fetchConversations();
+                      });
+                    }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi: $e")));
+                }
+              }, 
               icon: const Icon(Icons.chat_bubble_outline, size: 14), 
               label: const Text("Nhắn tin"),
               style: OutlinedButton.styleFrom(
@@ -149,12 +175,14 @@ class DetailTab extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildSummaryItem(Icons.category_outlined, item.categoryName),
-                _buildSummaryItem(
-                  Icons.location_on_outlined, 
-                  item.location.isNotEmpty ? item.location : "Chưa rõ vị trí",
+                Expanded(child: _buildSummaryItem(Icons.category_outlined, item.categoryName)),
+                Expanded(
+                  child: _buildSummaryItem(
+                    Icons.location_on_outlined, 
+                    item.location.isNotEmpty ? item.location : "Chưa rõ vị trí",
+                  ),
                 ),
-                _buildSummaryItem(dynamicSpec['icon'] as IconData, dynamicSpec['value'].toString()),
+                Expanded(child: _buildSummaryItem(dynamicSpec['icon'] as IconData, dynamicSpec['value'].toString())),
               ],
             ),
           ),
@@ -260,13 +288,18 @@ class DetailTab extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryItem(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+  Widget _buildSummaryItem(IconData icon, String label) {
+    return Column(
       children: [
-        Icon(icon, size: 15, color: Colors.black54), 
-        const SizedBox(width: 4), 
-        Text(text, style: const TextStyle(fontSize: 11.5, color: Colors.black87, fontWeight: FontWeight.w500))
+        Icon(icon, size: 20, color: Colors.grey),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 2, 
+          overflow: TextOverflow.ellipsis, 
+          style: const TextStyle(fontSize: 11), 
+        ),
       ],
     );
   }

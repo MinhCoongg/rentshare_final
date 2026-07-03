@@ -1,15 +1,16 @@
 class PolicyModel {
+  int? productId; 
   String type;
   double fineValue; 
   String unit;
   String content; 
   
-  // Bây giờ chúng là các trường dữ liệu thực thụ từ DB
   double? lightDamage;  
   double? mediumDamage; 
   double? heavyDamage;  
 
   PolicyModel({
+    this.productId, 
     required this.type,
     this.fineValue = 0.0,
     this.unit = 'VND',
@@ -21,6 +22,7 @@ class PolicyModel {
 
   factory PolicyModel.fromJson(Map<String, dynamic> json) {
     return PolicyModel(
+      productId: json['productId'],
       type: json['policyType'] ?? '', 
       fineValue: double.tryParse(json['fineValue']?.toString() ?? '0') ?? 0.0, 
       unit: json['unit'] ?? 'VND',
@@ -30,12 +32,13 @@ class PolicyModel {
     );
   }
 
+
   Map<String, dynamic> toJson() => {
     'type': type,
     'fineValue': fineValue,
     'unit': unit,
     'content': content,
-    'light_damage': lightDamage, // Phải khớp với tên cột trong DB
+    'light_damage': lightDamage, 
     'medium_damage': mediumDamage,
     'heavy_damage': heavyDamage,
   };

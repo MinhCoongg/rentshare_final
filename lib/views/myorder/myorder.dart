@@ -72,29 +72,16 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back),
+        //   onPressed: () {
+        //     Navigator.pushNamedAndRemoveUntil(context, '/mainscreen', (route) => false);
+        //   },
+        // ),
         title: const Text(
           "Đơn thuê của tôi",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        actions: [
-          IconButton(
-            icon: const Stack(
-              children: [
-                Icon(Icons.notifications_none_outlined, color: Colors.black, size: 28),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: CircleAvatar(
-                    radius: 7,
-                    backgroundColor: Colors.red,
-                    child: Text("3", style: TextStyle(color: Colors.white, fontSize: 9)),
-                  ),
-                )
-              ],
-            ),
-            onPressed: () {},
-          )
-        ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,

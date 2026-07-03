@@ -139,7 +139,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
 
       String remainingText = dynamicRemainingDays > 0 
           ? "Còn $dynamicRemainingDays ngày" 
-          : (dynamicRemainingDays == 0 ? "Hôm nay hạn trả!" : "Quá hạn ${dynamicRemainingDays.abs()} ngày ⚠️");
+          : (dynamicRemainingDays == 0 ? "Hôm nay hạn trả!" : "Quá hạn ${dynamicRemainingDays.abs()} ngày");
 
       return Container(
         width: double.infinity,
@@ -446,15 +446,18 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                             );
                           }),
                           const Divider(height: 20, thickness: 0.8),
-                          _buildAmountRow("Tạm tính (tiền thuê)", _format(order.rentalFee)),
+                          _buildAmountRow("Tạm tính (tiền thuê)", _format(viewModel.calculateTotalSelectedFee().toString())),
                           _buildAmountRow("Phí giao hàng", _format(order.shippingFee)),
-                          _buildAmountRow("Tiền cọc (đã đóng băng ví)", _format(order.depositFee)),
+                          _buildAmountRow("Tiền cọc (sẽ chuyên vào ví hệ thống)", _format(order.depositFee)),
                           const Divider(height: 20, thickness: 0.8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text("Tổng thanh toán", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                              Text(_format(order.totalAmount), style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+                              Text(
+                                _format((viewModel.calculateTotalSelectedFee() + double.parse(order.shippingFee)).toString()), 
+                                style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 16)
+                              ),
                             ],
                           )
                         ],
@@ -499,20 +502,44 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
           );
 
       if (mounted && result['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đã từ chối đơn hàng và hoàn cọc cho khách!")));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đã từ chối đơn hàng thành công "), backgroundColor: Color(0xff1B8A4B),));
         Navigator.pop(context);
       }
     }
   }
 
-  void _handleApproveOrder(BuildContext context, dynamic order) async {
-    final result = await context.read<RentalOrderViewModel>().approveRequest(order.id);
+  // void _handleApproveOrder(BuildContext context, dynamic order) async {
+  //   final result = await context.read<RentalOrderViewModel>().approveRequest(order.id);
     
+  //   if (mounted && result['success'] == true) {
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đã xử lý đơn hàng thành công!"), backgroundColor: Color(0xff1B8A4B),));
+  //     Navigator.pop(context);
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi: ${result['message'] ?? 'Không thể duyệt đơn'}"), backgroundColor: Colors.red,));
+  //   }
+  // }
+
+  void _handleApproveOrder(BuildContext context, dynamic order) async {
+    final viewModel = context.read<RentalOrderViewModel>();
+    bool hasSelected = order.items.any((item) => 
+      viewModel.selectedProducts[item.productId]?.isSelected ?? true
+    );
+    if (!hasSelected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Vui lòng chọn ít nhất 1 sản phẩm để duyệt đơn!"), 
+          backgroundColor: Colors.redAccent
+        )
+      );
+      return;
+    }
+
+    final result = await viewModel.approveRequest(order.id);
     if (mounted && result['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đã xử lý đơn hàng thành công!")));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Đã xử lý đơn hàng thành công!"), backgroundColor: Color(0xff1B8A4B)));
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi: ${result['message'] ?? 'Không thể duyệt đơn'}")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Lỗi: ${result['message'] ?? 'Không thể duyệt đơn'}"), backgroundColor: Colors.red));
     }
   }
 
@@ -571,4 +598,6 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
       ),
     );
   }
+
+  
 }

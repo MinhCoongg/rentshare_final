@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
 import 'package:rentshare_app/models/policy_model.dart';
 
@@ -35,7 +36,7 @@ class Step5PoliciesInfo extends StatelessWidget {
     return _buildPolicyCard("Trễ hạn", Icons.schedule, Colors.orangeAccent, [
       _buildModernSegmented(index, policy),
       const SizedBox(height: 16),
-      Wrap(spacing: 10, children: (policy.unit == 'PERCENT' ? [5, 10, 15, 20, 25, 30, 50] : [20000, 50000, 100000]).map((val) => _buildChip(val, index, policy)).toList()),
+      Wrap(spacing: 10, children: (policy.unit == 'PERCENT' ? [5, 10, 15, 20, 25, 30, 50] : [20000, 50000, 100000, 200000]).map((val) => _buildChip(val, index, policy)).toList()),
     ]);
   }
 
@@ -101,7 +102,7 @@ Widget _buildSliderField(String label, double value, double min, double max, Fun
   }
 
   Widget _buildChip(int val, int index, PolicyModel policy) => FilterChip(
-    label: Text(policy.unit == 'PERCENT' ? "$val%" : "${val.toString().replaceAll('000', '.000')}đ"), 
+    label: Text(policy.unit == 'PERCENT' ? "$val%" : "${FormatUtils.formatMoney(double.parse(val.toString()))}đ"), 
     selected: policy.fineValue == val.toDouble(),
     onSelected: (_) => vm.updatePolicyFineValue(index, val.toDouble()),
     selectedColor: Colors.orange.shade200,

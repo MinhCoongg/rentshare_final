@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rentshare_app/utils/format_utils.dart'; 
 import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
+import 'package:rentshare_app/views/wallet/deposit_wallet.dart';
 
 class PaymentPage extends StatelessWidget {
   const PaymentPage({super.key});
@@ -40,7 +41,6 @@ class PaymentPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 💳 KHỐI 1: PHƯƠNG THỨC THANH TOÁN (Ví nội bộ RentShare)
                   const Text("Phương thức thanh toán", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
                   const SizedBox(height: 12),
                   Container(
@@ -109,16 +109,42 @@ class PaymentPage extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 16),
                       child: Container(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
-                        child: Row(
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50, 
+                          borderRadius: BorderRadius.circular(8)
+                        ),
+                        child: Column( 
                           children: [
-                            const Icon(Icons.error_outline, color: Colors.red, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                "Số dư ví RentShare không đủ để thanh toán. Vui lòng nạp thêm!", 
-                                style: TextStyle(color: Colors.red.shade700, fontSize: 12, fontWeight: FontWeight.w500)
-                              )
+                            Row(
+                              children: [
+                                const Icon(Icons.error_outline, color: Colors.red, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    "Số dư ví RentShare không đủ để thanh toán.", 
+                                    style: TextStyle(color: Colors.red.shade700, fontSize: 12, fontWeight: FontWeight.w500)
+                                  )
+                                ),
+                              ],
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const DepositScreen()),
+                                  ).then((_) {
+                                    Provider.of<CheckoutViewModel>(context, listen: false).refreshWalletData();
+                                  });
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: const Text("Nạp thêm tiền >", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                              ),
                             ),
                           ],
                         ),

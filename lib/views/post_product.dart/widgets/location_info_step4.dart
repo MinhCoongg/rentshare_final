@@ -210,7 +210,7 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
                           ],
                         ),
                       ),
-                      const Icon(Icons.unfold_more, color: Colors.black54, size: 20), // Biểu tượng báo hiệu bấm vào để bung lựa chọn
+                      const Icon(Icons.unfold_more, color: Colors.black54, size: 20), 
                     ],
                   ),
                 ),
@@ -371,4 +371,6 @@ class _Step4LocationInfoState extends State<Step4LocationInfo> {
       child: child,
     );
   }
+
+  
 }

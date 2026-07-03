@@ -74,8 +74,8 @@ class PostProductViewModel extends ChangeNotifier {
 
   void selectMainCategoryId(int? mainCatId) {
     _selectedMainCategoryId = mainCatId;
-    model.categoryId = null; // Xóa mã con ngay lập tức
-    model.dynamicAttributes.clear(); // Xóa thuộc tính động tránh rác đè nhau
+    model.categoryId = null; 
+    model.dynamicAttributes.clear(); 
     categoryAttributes.clear();
     notifyListeners();
   }
@@ -84,7 +84,7 @@ class PostProductViewModel extends ChangeNotifier {
  
   void selectSubCategoryId(int? subCatId) {
     model.categoryId = subCatId; 
-    notifyListeners(); // Chỉ cần lưu ID và báo UI vẽ lại, hàm get categoryName ở trên sẽ tự động lo khâu dịch chữ!
+    notifyListeners(); 
   }
 
   void updateDepositAmount(String deposit) {
@@ -273,7 +273,7 @@ class PostProductViewModel extends ChangeNotifier {
       );
 
       if (success) {
-        currentStep = 7; 
+        currentStep = 6; 
       } else {
         errorMessage = "Đăng bài thất bại! Hệ thống kết nối API gặp sự cố kỹ thuật.";
       }

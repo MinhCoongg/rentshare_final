@@ -295,5 +295,20 @@ class RentalOrderViewModel extends ChangeNotifier {
     
     return itemsToSend;
   }
+
+  double calculateTotalSelectedFee() {
+    if (_currentOrder == null) return 0.0;
+    
+    double total = 0.0;
+    for (var item in _currentOrder!.items) {
+      bool isSelected = selectedProducts[item.productId]?.isSelected ?? true;
+      
+      if (isSelected) {
+        double pricePerDay = double.tryParse(item.pricePerDay) ?? 0.0;
+        total += pricePerDay * _currentOrder!.rentalDays * item.quantity;
+      }
+    }
+    return total;
+}
   
 }

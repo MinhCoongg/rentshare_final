@@ -105,7 +105,7 @@ class PostProductScreen extends StatelessWidget {
       case 5: 
         return ProductPreviewWidget(vm: vm); 
       case 6: 
-        return  _buildStep7(); 
+        return  _buildStep7(context); 
       default: 
         return const SizedBox();
     }
@@ -148,7 +148,7 @@ class PostProductScreen extends StatelessWidget {
   }
 
  
-  Widget _buildStep7() {
+  Widget _buildStep7(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -170,28 +170,11 @@ class PostProductScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 30),
-            
-            ElevatedButton(
-              onPressed: () { /* Điều hướng qua kho hàng */ },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 45),
-                backgroundColor: const Color(0xFF0056D2),
-              ),
-              child: const Text("Xem sản phẩm của tôi", style: TextStyle(color: Colors.white)),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () { /* Reset model và quay về bước 0 */ },
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 45),
-                side: const BorderSide(color: Color(0xFF0056D2)),
-              ),
-              child: const Text("Đăng thêm sản phẩm", style: TextStyle(color: Color(0xFF0056D2))),
-            ),
-            const SizedBox(height: 15),
-            
+
             TextButton(
-              onPressed: () { /* Quay về màn hình chính Home */ },
+              onPressed: () { 
+                  Navigator.pushNamedAndRemoveUntil(context, '/mainscreen', (route) => false);
+               },
               child: const Text("Về trang chủ", style: TextStyle(color: Colors.grey)),
             ),
           ],

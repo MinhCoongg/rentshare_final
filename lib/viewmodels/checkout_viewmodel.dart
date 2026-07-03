@@ -6,6 +6,7 @@ import 'package:rentshare_app/models/tierPerDay_model.dart';
 import 'package:rentshare_app/services/address_services.dart';
 import 'package:rentshare_app/services/bookdateProduct_service.dart'; 
 import 'package:rentshare_app/services/checkout_service.dart';
+import 'package:rentshare_app/services/wallet_service.dart';
 
 class CheckoutViewModel extends ChangeNotifier {
   final CheckoutService _checkoutService = CheckoutService();
@@ -176,5 +177,13 @@ class CheckoutViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> refreshWalletData() async {
+      try {
+        await fetchCheckoutData();
+      } catch (e) {
+        debugPrint("Lỗi cập nhật số dư: $e");
+      }
   }
 }
