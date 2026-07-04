@@ -22,6 +22,8 @@ class UserModel {
   final WalletModel wallet;
   final String? address; 
   final String? phoneNumber;
+  final String? status;  
+  final int? isOwner;
 
   UserModel({
     required this.id,
@@ -32,7 +34,11 @@ class UserModel {
     required this.wallet,
     this.address,     
     this.phoneNumber, 
+    this.isOwner,
+    this.status
   });
+
+  bool get isBlocked => status == 'Blocked';
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -41,9 +47,11 @@ class UserModel {
       email: json['email'] ?? '',
       role: json['role'] ?? '',
       avatar: json['avatar'] ?? '',
-      wallet: WalletModel.fromJson(json['wallet'] ?? {'balance': '0.0'}),
+      wallet: json['wallet'] != null ? WalletModel.fromJson(json['wallet']) : WalletModel(balance: 0.0),
       address: json['address'], 
       phoneNumber: json['phoneNumber'],
+      status: json['status'],
+      isOwner: json['isOwner'],
     );
   }
 
@@ -57,6 +65,8 @@ class UserModel {
       'wallet': wallet.toJson(),
       'address': address,       
       'phoneNumber': phoneNumber, 
+      'status': status,      
+      'isOwner': isOwner,
     };
   }
 
@@ -79,6 +89,8 @@ class UserModel {
       wallet: wallet ?? this.wallet,
       address: address ?? this.address,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      status: status ?? this.status,
+      isOwner: isOwner ?? this.isOwner,
     );
   }
 }

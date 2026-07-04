@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rentshare_app/utils/format_utils.dart'; 
 import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
+import 'package:rentshare_app/views/mainscreen.dart';
 import 'package:rentshare_app/views/wallet/deposit_wallet.dart';
 
 class PaymentPage extends StatelessWidget {
@@ -181,7 +182,13 @@ class PaymentPage extends StatelessWidget {
                           )
                         );
                         cartProvider.clearCart(); 
-                        Navigator.pushNamedAndRemoveUntil(context, '/my-order', (route) => false);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                            MaterialPageRoute(
+                              builder: (_) => const MainScreen(initialIndex: 4),
+                            ),
+                            (route) => false,
+                          );
                       } else if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

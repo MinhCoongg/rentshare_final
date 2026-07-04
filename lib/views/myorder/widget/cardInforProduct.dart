@@ -6,13 +6,11 @@ import 'package:rentshare_app/views/review/reviewProduct.dart';
 class RentalOrderCard extends StatelessWidget {
   final RentalOrderDetailModel order;
   final VoidCallback? onDetailPressed;
-  final VoidCallback? onContactPressed;
 
   const RentalOrderCard({
     super.key,
     required this.order,
     this.onDetailPressed,
-    this.onContactPressed,
   });
 
   String _getStatus(String status) {

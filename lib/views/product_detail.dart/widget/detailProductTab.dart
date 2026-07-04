@@ -9,8 +9,9 @@ import 'package:rentshare_app/views/chat/chat.dart';
 
 class DetailTab extends StatelessWidget {
   final ProductModel item;
+  final bool isAdmin;
 
-  const DetailTab({super.key, required this.item});
+  const DetailTab({super.key, required this.item, this.isAdmin = false});
 
   
   Map<String, dynamic> _getDynamicSpecification() {
@@ -133,7 +134,8 @@ class DetailTab extends StatelessWidget {
               const Icon(Icons.verified, color: Colors.blue, size: 14),
             ]),
             subtitle: const Text("Chủ shop Rentshare", style: TextStyle(color: Colors.grey, fontSize: 12)),
-            trailing: OutlinedButton.icon(
+            trailing: isAdmin ? const SizedBox.shrink()
+            : OutlinedButton.icon(
               onPressed: () async{
                 final myId = Provider.of<AuthProvider>(context, listen: false).id ?? 0;
                 try{

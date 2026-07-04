@@ -134,8 +134,8 @@ class _ChiTietBaoCaoScreenState extends State<ChiTietBaoCaoScreen> {
 
                           if (result['success']) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar( backgroundColor: const Color(0xff1B8A4B), content: Text(result['message'])));
+                            context.read<RentalOrderViewModel>().loadMyOrders();
                             Navigator.pop(context); // Quay về trang danh sách
-                            context.read<RentalOrderViewModel>().loadMyOrders(); 
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result['message'])));
                           }

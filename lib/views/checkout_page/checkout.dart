@@ -348,15 +348,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   elevation: 0,
                 ),
                 onPressed: checkoutVM.selectedDateRange == null
-                  ? null 
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PaymentPage(), 
-                        ),
-                      );
-                    },
+                    ? null
+                    : () {
+                        if (checkoutVM.deliveryMethod == "Shipping" &&
+                            checkoutVM.defaultAddress == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Vui lòng chọn hoặc thêm địa chỉ giao hàng."),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          );
+                          return;
+                        }
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PaymentPage(),
+                          ),
+                        );
+                      },
                 child: const Text("Tiếp tục", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
               ),
             ),

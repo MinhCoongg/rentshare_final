@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/views/myorder/widget/cardInforProduct.dart';
+import 'package:rentshare_app/views/profile/profile.dart';
 import 'package:rentshare_app/views/renter_check_complaine/checkcomplaine.dart';
 
 class MyRentalsScreen extends StatefulWidget {
@@ -72,12 +73,6 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back),
-        //   onPressed: () {
-        //     Navigator.pushNamedAndRemoveUntil(context, '/mainscreen', (route) => false);
-        //   },
-        // ),
         title: const Text(
           "Đơn thuê của tôi",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
@@ -120,26 +115,22 @@ class _MyRentalsScreenState extends State<MyRentalsScreen> with SingleTickerProv
             itemCount: viewModel.myOrders.length,
             itemBuilder: (context, index) {
               final order = viewModel.myOrders[index];
+              final rentalViewModel = Provider.of<RentalOrderViewModel>(context, listen: false);
               return RentalOrderCard(
                 order: order,
                 onDetailPressed: () async {
                   if (order.status == 'Inspecting') {
-                    Navigator.of(context, rootNavigator: true).push(
-                      MaterialPageRoute(
-                        builder: (_) => ChiTietBaoCaoScreen(
-                          orderId: order.id, // Truyền ID
-                          order: order,      // Truyền đối tượng order
-                        ),
-                      ),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => ChiTietBaoCaoScreen(orderId: order.id, order: order)),
                     );
-                  } 
-
-                  else {
-                    Navigator.of(context, rootNavigator: true).pushNamed('/rental-detail', arguments: order.id);
+                  } else {
+                   await Navigator.of(context).pushNamed('/rental-detail', arguments: order.id);
                   }
-                },
-                onContactPressed: () {
-                  // Logic chat 
+
+                  if (mounted) {
+                    rentalViewModel.loadMyOrders(status: _tabs[_tabController.index]['status']!);
+                  }
+                 
                 },
               );
             },

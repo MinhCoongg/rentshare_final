@@ -13,7 +13,8 @@ class LoginViewModel extends ChangeNotifier {
   String? _errorMessage;
   UserModel? _currentUser; 
   String _token = '';
-
+  
+  String get userRole => _currentUser?.role ?? '';
   LoginModel get loginData => _loginData;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -51,7 +52,10 @@ class LoginViewModel extends ChangeNotifier {
       final int id = user.id;
       if (context.mounted) {
         await context.read<AuthProvider>().saveAuth(token, user, id);
-        await Provider.of<WishlistProvider>(context, listen: false).fetchWishlist();
+        //await Provider.of<WishlistProvider>(context, listen: false).fetchWishlist();
+        if (user.role == 'User') {
+          await Provider.of<WishlistProvider>(context, listen: false).fetchWishlist();
+        }
       }
 
       _currentUser = user;

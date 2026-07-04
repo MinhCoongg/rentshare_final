@@ -2,11 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:rentshare_app/models/conversation.dart';
+import 'package:rentshare_app/models/message.dart';
 import '../services/chat_service.dart';
 
 class ChatViewModel extends ChangeNotifier {
   final ChatService _chatService = ChatService();
-  List<dynamic> messages = [];
+  List<Message> messages = [];
   List<Conversation> conversations = [];
   bool isLoading = true;
 
@@ -17,18 +18,20 @@ class ChatViewModel extends ChangeNotifier {
     _chatService.socket.off('receive_message');
 
     // Lắng nghe lịch sử
-    _chatService.socket.on('chat_history', (data) {
-      if (data is List) {
-        messages = List<dynamic>.from(data);
-        isLoading = false;
-        notifyListeners();
-      }
-    });
+   _chatService.socket.on('chat_history', (data) {
+    if (data is List) {
+      messages = (data)
+          .map((item) => Message.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+      isLoading = false;
+      notifyListeners();
+    }
+  });
 
-    // Lắng nghe tin nhắn mới
     _chatService.socket.on('receive_message', (data) {
       if (data != null) {
-        messages.add(data);
+        final newMessage = Message.fromJson(Map<String, dynamic>.from(data));
+        messages.add(newMessage);
         notifyListeners();
       }
     });

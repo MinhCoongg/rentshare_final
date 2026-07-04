@@ -30,13 +30,23 @@ class RenterActionButton extends StatelessWidget {
             content: "Bạn có chắc chắn muốn hủy đơn thuê này không?",
             actionButtonText: "Hủy đơn ngay",
           );
-          if (isConfirm && context.mounted) {
-            final result = await context.read<RentalOrderViewModel>().cancelOrder(order.id);
-            if (context.mounted && result['success'] == true) {
-              context.read<RentalOrderViewModel>().loadOrderDetailFull(order.id);
+         if (isConfirm && context.mounted) {
+          final result = await context.read<RentalOrderViewModel>().cancelOrder(order.id);
+  
+          if (context.mounted) {
+            if (result['success'] == true) {
+              await context.read<RentalOrderViewModel>().loadOrderDetailFull(order.id);
+              await Future.delayed(const Duration(milliseconds: 100));
+              if (context.mounted) {
+               Navigator.pop(context);
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(result['message'] ?? "Lỗi không xác định")),
+              );
             }
           }
-        },
+        }},
         icon: const Icon(Icons.cancel_presentation_outlined, size: 16, color: Colors.white),
         label: const Text("Hủy đơn thuê", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       );
@@ -58,7 +68,6 @@ class RenterActionButton extends StatelessWidget {
           ),
         ).then((value) async { 
           if (value == true) {
-            await Future.delayed(const Duration(milliseconds: 300)); 
             if (context.mounted) {
               context.read<RentalOrderViewModel>().loadOrderDetailFull(order.id);
             }

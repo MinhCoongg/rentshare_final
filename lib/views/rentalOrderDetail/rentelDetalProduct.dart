@@ -361,21 +361,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ),
                   child: SafeArea(
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, 
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              side: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            onPressed: () {}, // Logic chat
-                            child: const Text("Liên hệ shop", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: RenterActionButton(order : order, primaryColor: primaryColor),
+                        Expanded( 
+                          child: RenterActionButton(order: order, primaryColor: primaryColor),
                         ),
                       ],
                     ),

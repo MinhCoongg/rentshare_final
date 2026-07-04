@@ -63,7 +63,7 @@ class _ReturnOrderScreenState extends State<ReturnOrderScreen> {
               child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [Icon(Icons.check_circle_outline, color: Colors.orange, size: 16), SizedBox(width: 6), Text("Lưu ý quan trọng", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange))]),
                 SizedBox(height: 6),
-                Text("• Thời gian trả hàng sẽ được tính khi shop xác nhận đã nhận được hàng.\n• Vui lòng cung cấp thông tin chính xác để đảm bảo quyền lợi của bạn.", style: TextStyle(fontSize: 12, color: Colors.orange)),
+                Text("Thời gian trả hàng sẽ được tính khi shop xác nhận đã nhận được hàng.\n• Vui lòng cung cấp thông tin chính xác để đảm bảo quyền lợi của bạn.", style: TextStyle(fontSize: 12, color: Colors.orange)),
               ]),
             ),
           ],

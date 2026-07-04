@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:rentshare_app/models/message.dart';
 import 'package:rentshare_app/viewmodels/chat_viewmodel.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -53,15 +54,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     padding: EdgeInsets.all(10),
                     itemCount: vm.messages.length,
                     itemBuilder: (context, index) {
-                      final msg = vm.messages[index];
-                      final Map<String, dynamic> msgMap = Map<String, dynamic>.from(msg);
-                      bool isMe = msgMap['sender_id'] == widget.myUserId;
-                      String content = msgMap['content'] ?? "";
-                      String type = msgMap['messageType'] ?? 'text'; 
+                      final Message msg = vm.messages[index];
+                      bool isMe = msg.senderId == widget.myUserId;
+                      String content = msg.content;
+                      String type = msg.messageType;
                       if (type == 'image') {
                         return _buildImageBubble(content, isMe);
                       } else {
-                        return _buildMessageBubble(content, isMe);
+                        return _buildMessageBubble(content, isMe, msg.senderAvatar);
                       }
                     },
                   ),
@@ -75,14 +75,24 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(String msg, bool isMe) {
+  Widget _buildMessageBubble(String msg, bool isMe, String? avatarUrl ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isMe) CircleAvatar(radius: 16, backgroundColor: Colors.grey),
+          if (!isMe)
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: Colors.transparent,
+              backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
+                  ? NetworkImage('http://192.168.1.17:3001$avatarUrl')
+                  : null,
+              child: (avatarUrl == null || avatarUrl.isEmpty)
+                  ? Icon(Icons.person, color: Colors.grey)
+                  : null,
+            ),
           SizedBox(width: 8),
           Container(
             constraints: BoxConstraints(maxWidth: 250),

@@ -265,7 +265,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               Text(
                 "Sửa $title",
                 style: const TextStyle(
@@ -293,7 +292,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  
                   onPressed: () {
+                    final String text = controller.text.trim();
+                    if (title == "Email") {
+                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      if (!emailRegex.hasMatch(text)) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Email không hợp lệ!")));
+                        return;
+                      }
+                    } else if (title == "Số điện thoại") {
+                      final phoneRegex = RegExp(r'^(0[3|5|7|8|9])+([0-9]{8})\b');
+                      if (!phoneRegex.hasMatch(text)) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Số điện thoại không hợp lệ (Ví dụ: 0912345678)!")));
+                        return;
+                      }
+                    }
+                    if (controller.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("$title không được để trống!"), backgroundColor: Colors.redAccent,),
+                      );
+                      return; 
+                    }
                     onSave(controller.text);
                     Navigator.pop(context);
                   },
