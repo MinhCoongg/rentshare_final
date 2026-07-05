@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/utils/dialog_confirm.dart';
 import 'package:rentshare_app/viewmodels/user_viewmodel.dart';
+import 'package:rentshare_app/views/Admin/utils/star_card.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -47,41 +48,21 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  // 1. Thống kê
   Widget _buildStatsRow() {
   return Consumer<UserViewModel>(builder: (context, vm, _) {
     return Row(
       children: [
-        _statCard("Tổng người dùng", vm.stats['totalUsers']?.toString() ?? '0', Colors.purple, Icons.people),
-        _statCard("Chủ cho thuê", vm.stats['ownerUsers']?.toString() ?? '0', Colors.green, Icons.business_center),
-        _statCard("Quản trị viên", vm.stats['adminUsers']?.toString() ?? '0', Colors.orange, Icons.admin_panel_settings),
+        ...[
+          StatCard(title: "Tổng người dùng",count:  vm.stats['totalUsers']?.toString() ?? '0',color:  Colors.purple,icon:  Icons.people),
+        StatCard(title: "Chủ cho thuê",count:  vm.stats['ownerUsers']?.toString() ?? '0',color:  Colors.green,icon:  Icons.business_center),
+        StatCard(title: "Quản trị viên",count:  vm.stats['adminUsers']?.toString() ?? '0',color:  Colors.orange,icon:  Icons.admin_panel_settings),
+        ].map((card) => Expanded(child: card))
       ],
     );
   });
 }
 
-  Widget _statCard(String title, String count, Color color, IconData icon) { 
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.only(right: 16),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-        child: Row( 
-          children: [
-            Icon(icon, size: 40, color: color.withOpacity(0.5)),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(count, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-                Text(title, style: const TextStyle(color: Colors.grey)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   // 2. Thanh lọc & tìm kiếm
   Widget _buildFilterBar() {
@@ -114,7 +95,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  // 3. Bảng dữ liệu
   Widget _buildUserTable() {
     return Container(
       color: Colors.white,
@@ -184,6 +164,4 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       }),
     );
   }
-
-  // 4. Sidebar phải
 }

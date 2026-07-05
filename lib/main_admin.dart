@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/auth_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/chat_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/dashboard_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/login_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/navigation_provider.dart';
 import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
@@ -22,7 +23,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => RentalCartProvider()),
         ChangeNotifierProvider(create: (_) => ChatViewModel()),
-        ChangeNotifierProvider(create: (_) => UserViewModel())
+        ChangeNotifierProvider(create: (_) => UserViewModel()),
+        ChangeNotifierProvider(create: (_) => DashboardViewModel())
       ],
       child: MaterialApp(
         title: 'RentShare Admin',
