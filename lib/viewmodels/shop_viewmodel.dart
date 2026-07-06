@@ -60,7 +60,6 @@ class ShopViewModel extends ChangeNotifier {
     try {
       bool success = await ShopService.toggleStatus(token, productId, newStatus);
       if (success) {
-        // Cập nhật lại list ngay tại chỗ để UI tự vẽ lại
         final index = _products.indexWhere((p) => p.id == productId);
         if (index != -1) {
           _products[index] = ProductHomeModel(
@@ -81,9 +80,14 @@ class ShopViewModel extends ChangeNotifier {
           );
           notifyListeners(); // Báo UI vẽ lại cái nút "Ẩn/Hiện"
         }
+          ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Cập nhật trạng thái thành công!"), backgroundColor: Colors.green),
+        );
         Provider.of<HomeViewModel>(context, listen: false).fetchProducts();
       }else{
-        debugPrint("API trả về lỗi hoặc không thành công");
+          ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Không thể thay đổi trạng thái lúc này!"), backgroundColor: Colors.red),
+        );
       }
     } catch (e) {
       debugPrint("Lỗi toggle status: $e");

@@ -30,9 +30,9 @@ void main() {
         title: 'RentShare Admin',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.indigo),
-        initialRoute: '/',
+        initialRoute: '/login',
         routes: {
-        '/': (context) => LoginView(),
+        '/login': (context) => LoginView(),
         '/mainscreen': (context) => MainScreen(),
         '/admin-dashboard': (context) => AdminProductScreen(),
         '/admin-layout': (context) => MainLayout(),
