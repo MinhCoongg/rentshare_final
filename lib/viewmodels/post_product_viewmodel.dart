@@ -39,26 +39,6 @@ class PostProductViewModel extends ChangeNotifier {
   bool isLoadingAddress = false;           
   String? addressErrorMessage;     
   String selectedCategoryName = "Chưa phân loại";
-  Future<void> fetchCategories() async {
-    try {
-      categoriesTreeData = await ApiService.getAllCategories();
-    
-      if (model.categoryId != null && categoriesTreeData.isNotEmpty) {
-        for (var mainCat in categoriesTreeData) {
-          bool hasSub = mainCat.subCategories.any((sub) => sub.id == model.categoryId);
-          if (hasSub) {
-            _selectedMainCategoryId = mainCat.id;
-            break;
-          }
-        }
-      }
-      notifyListeners();
-    } catch (e) {
-      debugPrint("Lỗi đồng bộ cây danh mục tại ViewModel: $e");
-      errorMessage = "Không thể tải danh mục hệ thống!";
-      notifyListeners();
-    }
-  }
 
   void updateProductQuantity(int qty) {
     model.quantity = qty > 0 ? qty : 1;
@@ -162,7 +142,7 @@ class PostProductViewModel extends ChangeNotifier {
   }
 
   String? _validateStep1() {
-    //if (model.images.isEmpty) return "Vui lòng tải lên ít nhất 1 ảnh sản phẩm.";
+    if (model.images.isEmpty) return "Vui lòng tải lên ít nhất 1 ảnh sản phẩm.";
     if (model.title.trim().isEmpty) return "Tiêu đề Tên sản phẩm bắt buộc phải nhập!";
     if (model.quantity <= 0) return "Số lượng món đồ sẵn có phải lớn hơn 0!";
     if (model.categoryId == null) return "Vui lòng chọn loại sản phẩm nhóm nhỏ!";
@@ -243,11 +223,23 @@ class PostProductViewModel extends ChangeNotifier {
     if (_currentStep > 0) currentStep--;
   }
 
+  bool _isPicking = false; 
   Future<void> pickImages() async {
-    final List<XFile> pickedFiles = await _picker.pickMultiImage(imageQuality: 80);
-    if (pickedFiles.isNotEmpty) {
-      model.images.addAll(pickedFiles.map((file) => file.path).toList());
-      notifyListeners();
+    if (_isPicking) return; 
+
+    _isPicking = true; 
+
+    try {
+      final List<XFile> pickedFiles = await _picker.pickMultiImage(imageQuality: 80);
+      
+      if (pickedFiles.isNotEmpty) {
+        model.images.addAll(pickedFiles.map((file) => file.path).toList());
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Lỗi chọn nhiều ảnh: $e");
+    } finally {
+      _isPicking = false; 
     }
   }
 
@@ -343,10 +335,6 @@ class PostProductViewModel extends ChangeNotifier {
     policy.lightDamage = l;
     policy.mediumDamage = m;
     policy.heavyDamage = h;
-
-    debugPrint(
-        "Policy = ${policy.lightDamage} ${policy.mediumDamage} ${policy.heavyDamage}");
-
     notifyListeners();
   }
 
@@ -457,6 +445,27 @@ class PostProductViewModel extends ChangeNotifier {
     }
 
     return "Danh mục (#${model.categoryId})";
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      categoriesTreeData = await ApiService.getAllCategories();
+    
+      if (model.categoryId != null && categoriesTreeData.isNotEmpty) {
+        for (var mainCat in categoriesTreeData) {
+          bool hasSub = mainCat.subCategories.any((sub) => sub.id == model.categoryId);
+          if (hasSub) {
+            _selectedMainCategoryId = mainCat.id;
+            break;
+          }
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Lỗi đồng bộ cây danh mục tại ViewModel: $e");
+      errorMessage = "Không thể tải danh mục hệ thống!";
+      notifyListeners();
+    }
   }
 
   

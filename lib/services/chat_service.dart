@@ -18,7 +18,7 @@ class ChatService {
        return;
     }
 
-    socket = IO.io('http://192.168.1.17:3001', IO.OptionBuilder()
+    socket = IO.io('https://servertddnh-production.up.railway.app/', IO.OptionBuilder()
         .setTransports(['websocket']) 
         .disableAutoConnect()
         .build());

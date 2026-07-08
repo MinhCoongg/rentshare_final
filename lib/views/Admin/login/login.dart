@@ -76,7 +76,7 @@ class _LoginViewState extends State<LoginView> {
                             return null;
                           },
                           decoration: InputDecoration(
-                            hintText: 'Email hoặc số điện thoại',
+                            hintText: 'Email',
                             prefixIcon: const Icon(Icons.person_outline, color: Color(0xff1B8A4B)),
                             filled: true,
                             fillColor: const Color(0xffF8F9FA),

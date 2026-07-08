@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundImage:
               (user?.avatar != null && user!.avatar.isNotEmpty)
                   ? NetworkImage(
-                      "http://192.168.1.17:3001${user.avatar}",
+                      user.avatar,
                     )
                   : null, 
             child: (user?.avatar == null || user!.avatar.isEmpty)

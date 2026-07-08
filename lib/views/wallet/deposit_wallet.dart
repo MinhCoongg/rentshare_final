@@ -76,8 +76,8 @@ class _DepositScreenState extends State<DepositScreen> {
               ),
               const SizedBox(height: 20),
               const Text("Phương thức thanh toán", style: TextStyle(fontWeight: FontWeight.bold)),
-              _buildPaymentMethod("Chuyển khoản ngân hàng", 'http://192.168.1.17:3001/uploads/bank.jpg'),
-              _buildPaymentMethod("Ví MoMo", 'http://192.168.1.17:3001/uploads/momo.jpg'),
+              _buildPaymentMethod("Chuyển khoản ngân hàng", 'https://res.cloudinary.com/dxrjtaap/image/upload/v1783342727/bank_ufofbl.jpg'),
+              _buildPaymentMethod("Ví MoMo", 'https://res.cloudinary.com/dxrjtaap/image/upload/v1783342734/momo_ekwtqp.jpg'),
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,

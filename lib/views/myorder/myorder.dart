@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/views/myorder/widget/cardInforProduct.dart';
-import 'package:rentshare_app/views/profile/profile.dart';
 import 'package:rentshare_app/views/renter_check_complaine/checkcomplaine.dart';
 
 class MyRentalsScreen extends StatefulWidget {

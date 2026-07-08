@@ -1,3 +1,3 @@
 class ConstantURL{
-  static const String baseUrl = "http://192.168.1.17:3001/api";
+  static const String baseUrl = "https://servertddnh-production.up.railway.app/api";
 }

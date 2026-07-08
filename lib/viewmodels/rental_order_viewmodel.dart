@@ -122,12 +122,9 @@ class RentalOrderViewModel extends ChangeNotifier {
     try {
       final rejectedItems = getProcessedItems(); 
       
-      // 1. Gửi đi duyệt
       final success = await _orderService.approveRentalRequest(orderId, rejectedItems);
       
       if (success) {
-        // 2. QUAN TRỌNG: Load lại danh sách đơn hàng sau khi duyệt thành công
-        // Ní phải load lại để lấy dữ liệu mới nhất từ Server (đã loại món bị hủy)
         await loadOwnerOrders(status: 'Pending'); 
       }
       
@@ -177,7 +174,7 @@ class RentalOrderViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      // 🚀 Truyền trực tiếp File ảnh xuống Service, không cần gọi uploadReturnProof nữa
+
       final success = await _orderService.renterRequestReturn(orderId, imageFile, tracking, note);
       return {'success': success};
     } catch (e) {
@@ -297,18 +294,18 @@ class RentalOrderViewModel extends ChangeNotifier {
   }
 
   double calculateTotalSelectedFee() {
-    if (_currentOrder == null) return 0.0;
-    
-    double total = 0.0;
-    for (var item in _currentOrder!.items) {
-      bool isSelected = selectedProducts[item.productId]?.isSelected ?? true;
+      if (_currentOrder == null) return 0.0;
       
-      if (isSelected) {
-        double pricePerDay = double.tryParse(item.pricePerDay) ?? 0.0;
-        total += pricePerDay * _currentOrder!.rentalDays * item.quantity;
+      double total = 0.0;
+      for (var item in _currentOrder!.items) {
+        bool isSelected = selectedProducts[item.productId]?.isSelected ?? true;
+        
+        if (isSelected) {
+          double pricePerDay = double.tryParse(item.pricePerDay) ?? 0.0;
+          total += pricePerDay * _currentOrder!.rentalDays * item.quantity;
+        }
       }
-    }
-    return total;
-}
+      return total;
+  }
   
 }

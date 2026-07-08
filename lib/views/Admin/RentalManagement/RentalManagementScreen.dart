@@ -107,7 +107,15 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
                 DataCell(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(order.renterName), Text(order.renterPhone, style: TextStyle(fontSize: 11))])),
                 DataCell(Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(order.ownerName), Text(order.ownerPhone, style: TextStyle(fontSize: 11))])),
                 DataCell(Text("${FormatUtils.formatMoney(order.netIncome)}đ")),
-                DataCell(Chip(label: Text(order.status), backgroundColor: _getStatusColor(order.status))),
+                DataCell(
+                  Chip(
+                    label: Text(
+                      rentalStatusViMap[order.status] ?? order.status, 
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    backgroundColor: _getStatusColor(order.status),
+                  ),
+                ),
               ]);
             }).toList(),
           ),
@@ -118,9 +126,14 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'Completed': return Colors.green.shade100;
-      case 'Pending': return Colors.orange.shade100;
-      case 'Cancelled': return Colors.red.shade100;
+      case 'Completed': return Colors.green.shade100;  
+      case 'Delivered': 
+      case 'Returned': return Colors.blue.shade100;     
+      case 'Pending': 
+      case 'Approved': return Colors.orange.shade100;   
+      case 'Inspecting': return Colors.purple.shade100; 
+      case 'Cancelled': return Colors.red.shade100;    
+      case 'Overdue': return Colors.red.shade200;       
       default: return Colors.grey.shade100;
     }
   }
@@ -163,6 +176,18 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
     'Đã hủy': 'Cancelled',
   };
 
+  final Map<String, String> rentalStatusViMap = {
+    'Pending': 'Chờ duyệt',
+    'Approved': 'Đã duyệt',
+    'Shipping': 'Đang giao',
+    'Delivered': 'Đã giao',
+    'Returned': 'Đã trả',
+    'Inspecting': 'Đang nghiệm thu',
+    'Completed': 'Hoàn tất',
+    'Cancelled': 'Đã hủy',
+    'Overdue': 'Quá hạn',
+  };
+
   Widget _buildPagination(AdminProductViewModel vm) {
     int totalPages = vm.totalPages;
     if (totalPages <= 1) return const SizedBox();
@@ -191,7 +216,7 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
     );
   }
 
-  // Widget bo góc kiểu Figma
+
   Widget _buildPageItem(int page, bool isSelected, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
@@ -200,13 +225,11 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? Colors.purple : Colors.white,
-          borderRadius: BorderRadius.circular(8), // Bo góc vuông kiểu Figma
+          borderRadius: BorderRadius.circular(8), 
           border: Border.all(color: isSelected ? Colors.purple : Colors.grey.shade300),
         ),
         child: Text("$page", style: TextStyle(color: isSelected ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
       ),
     );
   }
-
-  
 }

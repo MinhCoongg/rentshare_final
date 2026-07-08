@@ -127,6 +127,10 @@ class RentalOrderService {
           return RentalOrderDetailModel.fromJson(decodedData['data']);
         }
       }
+      else{
+        debugPrint('${response.body}');
+        debugPrint('Lỗi fetch order');
+      }
       return null;
     } catch (e) {
       debugPrint("Lỗi Service fetchOrderDetailForOwner: $e");

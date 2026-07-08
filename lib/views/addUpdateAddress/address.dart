@@ -123,7 +123,6 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                     },
                   ),
                   
-                  // --- NÚT XÓA ---
                   TextButton.icon(
                     icon: const Icon(Icons.delete, size: 16, color: Colors.red),
                     label: const Text("Xóa", style: TextStyle(color: Colors.red)),
@@ -137,7 +136,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Hủy")),
                             TextButton(
                               onPressed: () async {
-                                Navigator.pop(ctx); // Đóng dialog trước
+                                Navigator.pop(ctx); 
                                 bool success = await vm.deleteAddress(addr.id!);
                                 if (success && context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(

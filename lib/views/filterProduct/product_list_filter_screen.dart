@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/models/producthome_model.dart';
+import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/home_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/productFilter.dart';
 import 'package:rentshare_app/views/filterProduct/widget/priceFilter.dart';
@@ -75,7 +76,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
           ),
           
-          // 2. Thanh Filter Tags
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -170,7 +170,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       
                       const SizedBox(height: 10),
                       
-                      Text("${item.minPrice.toStringAsFixed(0)}đ / ngày", 
+                      Text("${FormatUtils.formatMoney(item.minPrice)}đ / ngày", 
                           style: const TextStyle(color: Color(0xFF5A31F4), fontWeight: FontWeight.bold, fontSize: 14)),
                       
                       const SizedBox(height: 6),

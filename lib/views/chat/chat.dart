@@ -20,6 +20,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   late ChatViewModel _viewModel; 
+   bool _isPicking = false; 
   @override
   void initState() {
     super.initState();
@@ -87,7 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
               radius: 16,
               backgroundColor: Colors.transparent,
               backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
-                  ? NetworkImage('http://192.168.1.17:3001$avatarUrl')
+                  ? NetworkImage(avatarUrl)
                   : null,
               child: (avatarUrl == null || avatarUrl.isEmpty)
                   ? Icon(Icons.person, color: Colors.grey)
@@ -120,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.network('http://192.168.1.17:3001$imageUrl', width: 200, height: 200, fit: BoxFit.cover),
+          child: Image.network(imageUrl, width: 200, height: 200, fit: BoxFit.cover),
         ),
       ),
     );
@@ -141,14 +142,25 @@ class _ChatScreenState extends State<ChatScreen> {
           // 1. Nút thêm ảnh
           IconButton(
             icon: Icon(Icons.add_photo_alternate, color: Colors.blueAccent),
-            onPressed: () async {
+          onPressed: () async {
+            if (_isPicking) return; 
+            
+            setState(() => _isPicking = true);
+            
+            try {
               final ImagePicker picker = ImagePicker();
               final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+              
               if (image != null) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Đang gửi ảnh...")));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Đang gửi ảnh..."),backgroundColor: Colors.green,));
                 await vm.uploadAndSendImage(File(image.path), widget.conversationId, widget.myUserId);
               }
-            },
+            } catch (e) {
+              debugPrint("Lỗi chọn ảnh: $e");
+            } finally {
+              setState(() => _isPicking = false); 
+            }
+          },
           ),
           Expanded(
             child: TextField(

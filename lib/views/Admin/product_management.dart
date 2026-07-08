@@ -65,45 +65,49 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
     });
   }
 
-  Widget _buildFilterBar() {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-    child: Row(
-      children: [
-        Expanded(
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: "Tìm kiếm sản phẩm, người đăng...", 
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+    Widget _buildFilterBar() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: "Tìm kiếm sản phẩm, người đăng...", 
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+              ),
+              onChanged: (value) {
+                context.read<AdminProductViewModel>().searchProducts(value);
+              },
             ),
-            onChanged: (value) {
-              context.read<AdminProductViewModel>().searchProducts(value);
-            },
           ),
-        ),
-        const SizedBox(width: 16),
+          const SizedBox(width: 16),
 
-        Consumer<AdminProductViewModel>(builder: (context, vm, _) {
+          Consumer<AdminProductViewModel>(builder: (context, vm, _) {
           final String currentValure = vm.selectedStatus.isEmpty ? '' : vm.selectedStatus;
+          final validValues = ['', 'Pending', 'Available', 'Hidden', 'Cancelled'];
+          final safeValue = validValues.contains(currentValure) ? currentValure : '';
+
           return DropdownButton<String>(
-            value: currentValure,
+            value: safeValue,
             hint: const Text("Tất cả trạng thái"),
             items: const [
               DropdownMenuItem(value: '', child: Text("Tất cả")),
               DropdownMenuItem(value: 'Pending', child: Text("Chờ duyệt")),
               DropdownMenuItem(value: 'Available', child: Text("Đã phê duyệt")),
               DropdownMenuItem(value: 'Hidden', child: Text("Từ chối")),
+              DropdownMenuItem(value: 'Cancelled', child: Text("Đã hủy")), 
             ],
             onChanged: (val) => vm.filterByStatus(val ?? ''),
           );
         }),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildProductTable() {
     return Container(
@@ -127,7 +131,7 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
                   child: Row(
                     children: [
                       Image.network(
-                        'http://192.168.1.17:3001${p.imageUrl}', 
+                        '${p.imageUrl}', 
                         width: 40, height: 40, fit: BoxFit.cover,
                         errorBuilder: (c, o, s) => const Icon(Icons.image_not_supported),
                       ),

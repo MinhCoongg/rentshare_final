@@ -26,6 +26,8 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
   OrderDetailItem get currentItem => widget.order.items[0];
   List<PolicyModel> _policies = [];
   final TextEditingController _note = TextEditingController();
+  bool _isPicking = false;
+  String _mainStatus = "Good"; 
 
   @override
   void initState() {
@@ -39,11 +41,24 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
     if (mounted) setState(() => _policies = data);
   }
 
-  Future<void> _pickImage() async {
-    final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) setState(() => _image = File(picked.path));
-  }
 
+
+  Future<void> _pickImage() async {
+    if (_isPicking) return; 
+
+    setState(() => _isPicking = true);
+
+    try {
+      final XFile? picked = await _picker.pickImage(source: ImageSource.gallery);
+      if (picked != null) {
+        setState(() => _image = File(picked.path));
+      }
+    } catch (e) {
+      debugPrint("Lỗi: $e");
+    } finally {
+      setState(() => _isPicking = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +112,7 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
         if (_step == 2) const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, padding: const EdgeInsets.symmetric(vertical: 16)),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(vertical: 16)),
             onPressed: () async {
               if (_selectedIssues.contains('Good') && _selectedIssues.length == 1) {
                 bool success = await context.read<RentalOrderViewModel>().sendDamageReport(widget.order.id, "Tình trạng: Tốt.", 0, null);
@@ -123,52 +138,67 @@ class _NghiemThuProductScreenState extends State<NghiemThuProductScreen> {
   );
 
   Widget _buildStatusOptions() {
-    final damagePolicy = _policies.firstWhere((p) => p.type == "Hư hỏng", orElse: () => PolicyModel(type: "Hư hỏng", lightDamage: 10, mediumDamage: 40, heavyDamage: 90));
+    final damagePolicy = _policies.firstWhere(
+      (p) => p.type == "Hư hỏng", 
+      orElse: () => PolicyModel(type: "Hư hỏng", lightDamage: 10, mediumDamage: 40, heavyDamage: 90)
+    );
+
     return Column(
       children: [
-        _buildCheckboxItem("Sản phẩm còn tốt", "Không mất phí", "Good", damagePolicy),
-        _buildCheckboxItem("Trễ hạn", "Phạt theo quy định", "Late", damagePolicy),
-        _buildCheckboxItem("Hư hỏng", "Phí: Tùy mức độ", "Broken", damagePolicy),
+        RadioListTile<String>(
+          contentPadding: EdgeInsets.zero,
+          title: const Text("Sản phẩm còn tốt", style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: const Text("Không mất phí", style: TextStyle(fontSize: 12, color: Colors.grey)),
+          value: "Good",
+          groupValue: _mainStatus,
+          activeColor: Colors.deepPurple,
+          onChanged: (val) => setState(() {
+            _mainStatus = val!;
+            _selectedIssues.clear();
+            _selectedIssues.add("Good");
+            _selectedDamagePercent = null; // Reset lại khi chọn Tốt
+          }),
+        ),
+        RadioListTile<String>(
+          contentPadding: EdgeInsets.zero,
+          title: const Text("Sản phẩm có vấn đề", style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: const Text("Phí trễ hạn hoặc hư hỏng", style: TextStyle(fontSize: 12, color: Colors.grey)),
+          value: "Issue",
+          groupValue: _mainStatus,
+          activeColor: Colors.deepPurple,
+          onChanged: (val) => setState(() {
+            _mainStatus = val!;
+            _selectedIssues.remove("Good");
+          }),
+        ),
+        if (_mainStatus == "Issue") ...[
+          _buildDetailCheckbox("Trễ hạn", "Late", damagePolicy),
+          _buildDetailCheckbox("Hư hỏng", "Broken", damagePolicy),
+        ],
       ],
     );
   }
 
-  Widget _buildCheckboxItem(String title, String sub, String val, PolicyModel damagePolicy) {
+  Widget _buildDetailCheckbox(String title, String val, PolicyModel damagePolicy) {
     bool isChecked = _selectedIssues.contains(val);
     return Column(
       children: [
         CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
+          contentPadding: const EdgeInsets.only(left: 32),
           title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text(sub, style: const TextStyle(fontSize: 12, color: Colors.grey)),
           value: isChecked,
           activeColor: Colors.deepPurple,
-          onChanged: (bool? value) {
-            setState(() {
-              if (value == true) {
-                if (val == "Broken") {
-                  _selectedIssues.remove("Good");
-                } else if (val == "Good") {
-                  _selectedIssues.remove("Broken");
-                }
-                _selectedIssues.add(val);
-              } else {
-                _selectedIssues.remove(val);
-              }
-            });
-          },
+          onChanged: (valBool) => setState(() {
+            valBool! ? _selectedIssues.add(val) : _selectedIssues.remove(val);
+          }),
         ),
-
         if (val == "Late" && isChecked)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
-              child: Text(
-                "Sản phẩm trễ $_calculatedLateDays ngày theo hệ thống", 
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
-              ),
+              child: Text("Sản phẩm trễ $_calculatedLateDays ngày", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
             ),
           ),
         if (val == "Broken" && isChecked) _buildDamageButtons(damagePolicy),

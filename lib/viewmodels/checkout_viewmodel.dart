@@ -6,7 +6,6 @@ import 'package:rentshare_app/models/tierPerDay_model.dart';
 import 'package:rentshare_app/services/address_services.dart';
 import 'package:rentshare_app/services/bookdateProduct_service.dart'; 
 import 'package:rentshare_app/services/checkout_service.dart';
-import 'package:rentshare_app/services/wallet_service.dart';
 
 class CheckoutViewModel extends ChangeNotifier {
   final CheckoutService _checkoutService = CheckoutService();
@@ -44,7 +43,6 @@ class CheckoutViewModel extends ChangeNotifier {
     if (item.tierPricings.isNotEmpty) {
       List<TierPricingModel> sortedTiers = List.from(item.tierPricings);
       sortedTiers.sort((a, b) => b.minDays.compareTo(a.minDays));
-
       for (var tier in sortedTiers) {
         if (days >= tier.minDays) {
           pricePerDay = tier.pricePerDay;

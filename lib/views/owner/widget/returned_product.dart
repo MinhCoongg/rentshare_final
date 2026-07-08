@@ -40,7 +40,7 @@ class ReturnVerificationSection extends StatelessWidget {
               onTap: () { },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network('http://192.168.1.17:3001${order.returnProof!}', height: 160, width: double.infinity, fit: BoxFit.cover),
+                child: Image.network('${order.returnProof!}', height: 160, width: double.infinity, fit: BoxFit.cover),
               ),
             ),
             const SizedBox(height: 16),

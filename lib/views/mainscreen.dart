@@ -19,11 +19,14 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex;
+    if (widget.initialIndex < 0 || widget.initialIndex >= _pages.length) {
+      _selectedIndex = 0;
+    } else {
+      _selectedIndex = widget.initialIndex;
+    }
   }
   
   final List<Widget> _pages = const [
-    HomePage(),
     HomePage(),
     PostProductScreen(),
     ChatListScreen(),
@@ -47,7 +50,6 @@ class _MainScreenState extends State<MainScreen> {
         },
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: "Trang chủ"),
-          NavigationDestination(icon: Icon(Icons.grid_view_outlined), selectedIcon: Icon(Icons.grid_view), label: "Sản phẩm"),
           NavigationDestination(icon: Icon(Icons.add_circle_outline), selectedIcon: Icon(Icons.add_circle), label: "Đăng SP"),
           NavigationDestination(icon: Icon(Icons.message_outlined), selectedIcon: Icon(Icons.receipt_long), label: "Tin nhắn"),
           NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: "Cá nhân"),

@@ -55,14 +55,29 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     }
   }
 
+  bool _isPicking = false;
   Future<void> _handlePickImage() async {
-    final List<XFile> pickedFiles = await _picker.pickMultiImage();
+    if (_isPicking) return; 
 
-    if (pickedFiles.isNotEmpty) {
+    setState(() {
+      _isPicking = true;
+    });
+
+    try {
+      final List<XFile> pickedFiles = await _picker.pickMultiImage();
+
+      if (pickedFiles.isNotEmpty) {
+        setState(() {
+          _images?.addAll(
+            pickedFiles.map((e) => File(e.path)),
+          );
+        });
+      }
+    } catch (e) {
+      debugPrint("Lỗi khi chọn ảnh: $e");
+    } finally {
       setState(() {
-        _images?.addAll(
-          pickedFiles.map((e) => File(e.path)),
-        );
+        _isPicking = false;
       });
     }
   }

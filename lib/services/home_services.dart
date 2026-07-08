@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:rentshare_app/constant/constant_url.dart';
 import 'package:rentshare_app/models/category_model.dart';
 import 'package:rentshare_app/models/producthome_model.dart';
-import 'package:rentshare_app/models/shop_model.dart'; // File này chứa cả ProductHomeModel và ShopHomeModel
+import 'package:rentshare_app/models/shop_model.dart'; 
 
 class HomeService {
 
@@ -47,7 +47,7 @@ class HomeService {
 
        
         final List<dynamic> shopJson = homeData['trustedShops'] ?? [];
-        List<ShopHomeModel> shops = shopJson.map((e) => ShopHomeModel.fromJson(e)).toList(); // Ép chuẩn sang khuôn ShopHomeModel
+        List<ShopHomeModel> shops = shopJson.map((e) => ShopHomeModel.fromJson(e)).toList(); 
 
         return {
           'featured': featured,

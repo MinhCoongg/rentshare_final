@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rentshare_app/constant/constant_url.dart';
 import 'package:rentshare_app/models/adminProduct.dart';
@@ -48,13 +49,25 @@ class ProductAdminService {
 
   Future<Map<String, dynamic>> fetchOrdersData(String status, String search, int page) async {
     final token = await SharedPrefsUtils.getToken();
-    final url = Uri.parse('${ConstantURL.baseUrl}/admin/orders').replace(queryParameters: {
-      'status': status == 'All' ? '' : status,
-      'search': search,
+    Map<String, String> queryParams = {
       'page': page.toString(),
-    });
+    };
+    if (status.isNotEmpty && status != 'All') {
+      queryParams['status'] = status;
+    }
+    
+    if (search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
+    final url = Uri.parse('${ConstantURL.baseUrl}/admin/orders').replace(queryParameters: queryParams);
 
-    final response = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+    final response = await http.get(
+      url, 
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json'
+      }
+    );
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);

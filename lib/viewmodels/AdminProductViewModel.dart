@@ -34,6 +34,8 @@ class AdminProductViewModel extends ChangeNotifier {
 
 
   Future<void> filterByStatus(String status) async {
+    _selectedStatus = status; 
+    notifyListeners();
     await loadProducts(status, search: _currentSearch);
   }
 
@@ -68,35 +70,34 @@ class AdminProductViewModel extends ChangeNotifier {
   Future<void> approveOrReject(int productId, String newStatus, String currentStatus) async {
     bool success = await _service.updateStatus(productId, newStatus);
     if (success) {
-      // Sau khi cập nhật xong, load lại đúng cái status cũ đang lọc
       await loadProducts(_currentStatus, search: _currentSearch);
     }
   }
 
-  Future<void> loadOrders({String? status, String? search, int? page}) async {
-    if (status != null) _selectedStatus = status;
-    if (search != null) _currentSearch = search;
-    if (page != null) _currentPage = page;
-    
-    isLoading = true;
-    notifyListeners(); 
+    Future<void> loadOrders({String? status, String? search, int? page}) async {
+      if (status != null) _selectedStatus = status;
+      if (search != null) _currentSearch = search;
+      if (page != null) _currentPage = page;
+      
+      isLoading = true;
+      notifyListeners(); 
 
-    try {
-     final result = await _service.fetchOrdersData(
-        _selectedStatus == 'All' ? '' : _selectedStatus, 
-        _currentSearch, 
-        _currentPage
-      );
-      _orders = result['data'];
-      _statsus = result['stats'];
-    } catch (e) {
-      _orders = [];
-      debugPrint("Lỗi loadOrders: $e");
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
-}
+      try {
+      final result = await _service.fetchOrdersData(
+          _selectedStatus == 'All' ? '' : _selectedStatus, 
+          _currentSearch, 
+          _currentPage
+        );
+        _orders = result['data'];
+        _statsus = result['stats'];
+      } catch (e) {
+        _orders = [];
+        debugPrint("Lỗi loadOrders: $e");
+      } finally {
+        isLoading = false;
+        notifyListeners();
+      }
+  }
 
   Future<void> filterOrderByStatus(String status) async {
     _currentPage = 1; 

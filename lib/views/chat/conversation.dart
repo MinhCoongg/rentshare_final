@@ -75,7 +75,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  'http://192.168.1.17:3001${chat.productImage}', 
+                  chat.productImage, 
                   width: 60, height: 60, fit: BoxFit.cover
                 ),
               ),

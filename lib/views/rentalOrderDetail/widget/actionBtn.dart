@@ -42,7 +42,7 @@ class RenterActionButton extends StatelessWidget {
               }
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(result['message'] ?? "Lỗi không xác định")),
+                SnackBar(content: Text("Huỷ đơn thuê thành công!")),
               );
             }
           }

@@ -86,7 +86,7 @@ class ShopViewModel extends ChangeNotifier {
         Provider.of<HomeViewModel>(context, listen: false).fetchProducts();
       }else{
           ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Không thể thay đổi trạng thái lúc này!"), backgroundColor: Colors.red),
+          const SnackBar(content: Text("Sản phẩm này Admin không duyệt cho bạn!"), backgroundColor: Colors.red),
         );
       }
     } catch (e) {

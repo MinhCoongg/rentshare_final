@@ -77,7 +77,7 @@ class OwnerProductPage extends StatelessWidget {
                 // Nút Xem
                 OutlinedButton.icon(
                   onPressed: () { 
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailPage(productId: product.id)));
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailPage(productId: product.id, isAdmin: true,)));
                    },
                   icon: const Icon(Icons.remove_red_eye_outlined, size: 16),
                   label: const Text("Xem"),

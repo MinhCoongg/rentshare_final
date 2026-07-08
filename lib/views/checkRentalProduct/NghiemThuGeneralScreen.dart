@@ -19,8 +19,7 @@ class NghiemThuGeneralScreen extends StatefulWidget {
 class _NghiemThuGeneralScreenState extends State<NghiemThuGeneralScreen> {
   Map<int, ReportData> _reports = {};
   List<PolicyModel> _policies = [];
-  Set<String> _selectedIssues = {}; 
-  double? _selectedDamagePercent;
+  bool _isPicking = false;
   
   Future<void> _loadPolicies() async {
     int pId = widget.order.items[0].productId;
@@ -120,12 +119,9 @@ class _NghiemThuGeneralScreenState extends State<NghiemThuGeneralScreen> {
             }),
           ),
 
-    
-          // 1. Hiện nút chọn mức độ (Chỉ hiện khi Hư hỏng)
           if (report.isBroken) 
             _buildDamageButtons(damagePolicy, report),
 
-          // 2. Hiện Ghi chú và Ảnh (Hiện nếu Trễ HOẶC Hư hỏng)
           if (report.isLate || report.isBroken) ...[
             const SizedBox(height: 10),
             const Text("Ghi chú:", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -198,9 +194,17 @@ class _NghiemThuGeneralScreenState extends State<NghiemThuGeneralScreen> {
         report.image == null 
             ? GestureDetector(
                 onTap: () async {
-                  final XFile? picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-                  if (picked != null) {
-                    setState(() => report.image = File(picked.path));
+                  if (_isPicking) return;
+                  setState(() => _isPicking = true);
+                  try {
+                    final XFile? picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+                    if (picked != null) {
+                      setState(() => report.image = File(picked.path));
+                    }
+                  } catch (e) {
+                    debugPrint("Lỗi khi chọn ảnh: $e");
+                  } finally {
+                    setState(() => _isPicking = false);
                   }
                 },
                 child: DottedBorder(
@@ -234,7 +238,7 @@ class _NghiemThuGeneralScreenState extends State<NghiemThuGeneralScreen> {
     );
   }
 
-  // Ní dán cái này vào, tui đã sửa tên thành _buildDamageButtons để khớp với code của ní
+ 
 Widget _buildDamageButtons(PolicyModel damagePolicy, ReportData report) {
   return Padding(
     padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),

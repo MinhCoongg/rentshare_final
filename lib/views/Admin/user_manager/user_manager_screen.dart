@@ -114,7 +114,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 children: [
                   CircleAvatar(
                     radius: 18,
-                    backgroundImage: NetworkImage('http://192.168.1.17:3001${user.avatar}') 
+                    backgroundImage: NetworkImage('${user.avatar}') 
                   ),
                   const SizedBox(width: 12),
                   Column(

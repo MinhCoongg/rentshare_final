@@ -17,7 +17,6 @@ class OwnerRentalManagementScreen extends StatefulWidget {
 
 class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScreen> {
   final TextEditingController _reasonController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -410,17 +409,9 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                            Text("${_format(item.pricePerDay)} / ngày", style: TextStyle(color: Colors.grey[500], fontSize: 11)),
                                           ],
                                         ),
                                       ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          Text("x${item.quantity}", style: TextStyle(color: Colors.grey[600], fontSize: 11)),
-                                          Text(_format((double.parse(item.pricePerDay) * order.rentalDays * item.quantity).toString()), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                        ],
-                                      )
                                     ],
                                   ),
                                   if (!isSelected)
@@ -446,7 +437,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                             );
                           }),
                           const Divider(height: 20, thickness: 0.8),
-                          _buildAmountRow("Tạm tính (tiền thuê)", _format(viewModel.calculateTotalSelectedFee().toString())),
+                          _buildAmountRow("Tạm tính (tiền thuê)", _format(order.rentalFee.toString())),
                           _buildAmountRow("Phí giao hàng", _format(order.shippingFee)),
                           _buildAmountRow("Tiền cọc (sẽ chuyên vào ví hệ thống)", _format(order.depositFee)),
                           const Divider(height: 20, thickness: 0.8),
@@ -455,7 +446,7 @@ class _OwnerRentalManagementScreenState extends State<OwnerRentalManagementScree
                             children: [
                               const Text("Tổng thanh toán", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                               Text(
-                                _format((viewModel.calculateTotalSelectedFee() + double.parse(order.shippingFee)).toString()), 
+                                _format(( double.parse(order.rentalFee) + double.parse(order.shippingFee)).toString()), 
                                 style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 16)
                               ),
                             ],

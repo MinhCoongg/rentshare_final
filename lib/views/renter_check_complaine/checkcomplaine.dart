@@ -78,7 +78,7 @@ class _ChiTietBaoCaoScreenState extends State<ChiTietBaoCaoScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8), 
                       child: Image.network(
-                        'http://192.168.1.17:3001${report.evidence}', 
+                        '${report.evidence}', 
                         height: 150, 
                         width: double.infinity, 
                         fit: BoxFit.cover,

@@ -184,8 +184,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 image: DecorationImage(
                   image: NetworkImage(
                     avatarUrl.isNotEmpty
-                        ? 'http://192.168.1.17:3001$avatarUrl'
-                        : 'http://192.168.1.17:3001/uploads/rentshare.jpg',
+                        ? avatarUrl
+                        : 'https://res.cloudinary.com/dxrjtaap/image/upload/v1783342736/rentshare_z7erak.jpg',
                   ),
                   fit: BoxFit.cover,
                 ),
