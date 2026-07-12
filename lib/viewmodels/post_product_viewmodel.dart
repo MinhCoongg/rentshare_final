@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:rentshare_app/models/address_model.dart';
 import 'package:rentshare_app/models/attribute_model.dart';
 import 'package:rentshare_app/models/category_model.dart';
 import 'package:rentshare_app/models/policy_model.dart';
+import 'package:rentshare_app/services/address_services.dart';
 import '../models/post_product_model.dart';
 import '../services/api_services.dart';
 
@@ -33,27 +35,10 @@ class PostProductViewModel extends ChangeNotifier {
   String? errorMessage;
   final ImagePicker _picker = ImagePicker();
 
-
-  Future<void> fetchCategories() async {
-    try {
-      categoriesTreeData = await ApiService.getAllCategories();
-    
-      if (model.categoryId != null && categoriesTreeData.isNotEmpty) {
-        for (var mainCat in categoriesTreeData) {
-          bool hasSub = mainCat.subCategories.any((sub) => sub.id == model.categoryId);
-          if (hasSub) {
-            _selectedMainCategoryId = mainCat.id;
-            break;
-          }
-        }
-      }
-      notifyListeners();
-    } catch (e) {
-      debugPrint("Lỗi đồng bộ cây danh mục tại ViewModel: $e");
-      errorMessage = "Không thể tải danh mục hệ thống!";
-      notifyListeners();
-    }
-  }
+  List<AddressModel> userAddressBook = []; 
+  bool isLoadingAddress = false;           
+  String? addressErrorMessage;     
+  String selectedCategoryName = "Chưa phân loại";
 
   void updateProductQuantity(int qty) {
     model.quantity = qty > 0 ? qty : 1;
@@ -69,17 +54,18 @@ class PostProductViewModel extends ChangeNotifier {
 
   void selectMainCategoryId(int? mainCatId) {
     _selectedMainCategoryId = mainCatId;
-    model.categoryId = null; // Xóa mã con ngay lập tức
-    model.dynamicAttributes.clear(); // Xóa thuộc tính động tránh rác đè nhau
+    model.categoryId = null; 
+    model.dynamicAttributes.clear(); 
     categoryAttributes.clear();
     notifyListeners();
   }
 
+ 
+ 
   void selectSubCategoryId(int? subCatId) {
     model.categoryId = subCatId; 
-    notifyListeners();
+    notifyListeners(); 
   }
-
 
   void updateDepositAmount(String deposit) {
     model.depositAmount = double.tryParse(deposit) ?? 0.0;
@@ -176,57 +162,84 @@ class PostProductViewModel extends ChangeNotifier {
     return null;
   }
 
-  String? _validateStep3() {
-    if (model.depositAmount <= 0) return "Vui lòng thiết lập khoản tiền đặt cọc bảo đảm.";
-    for (int i = 0; i < tierPrices.length; i++) {
-      final price = tierPrices[i]["pricePerDay"] as double;
-      final days = tierPrices[i]["minDays"] as int;
-      if (price <= 0) {
-        return "Giá thuê của mức cấu hình số ${i + 1} (Mốc $days ngày) phải lớn hơn 0đ!";
-      }
+ String? _validateStep3() {
+    if (model.depositAmount <= 0) {
+      return "Vui lòng thiết lập khoản tiền đặt cọc bảo đảm lớn hơn 0đ.";
     }
-    return null;
+    if (tierPrices.isEmpty) {
+      return "Vui lòng cấu hình ít nhất một mốc giá thuê.";
+    }
+    int previousDays = 0;
+    double previousPrice = double.infinity; 
+    for (int i = 0; i < tierPrices.length; i++) {
+      final int days = int.tryParse(tierPrices[i]["minDays"].toString()) ?? 0;
+      final double price = double.tryParse(tierPrices[i]["pricePerDay"].toString()) ?? 0.0;
+      if (days < 1) {
+        return "Mốc số ${i + 1}: Số ngày thuê tối thiểu phải là số nguyên và lớn hơn hoặc bằng 1 ngày!";
+      }
+      if (price <= 0) {
+        return "Mốc số ${i + 1} ($days ngày): Giá thuê theo ngày bắt buộc phải lớn hơn 0đ!";
+      }
+      if (days <= previousDays) {
+        return "Lỗi cấu hình mốc số ${i + 1}: Số ngày ($days ngày) phải lớn hơn số ngày của mốc trước đó ($previousDays ngày)!";
+      }
+      if (price > previousPrice) {
+        return "Lỗi cấu hình mốc số ${i + 1}: Giá thuê ($price đ) không được lớn hơn giá thuê của mốc trước đó ($previousPrice đ) để đảm bảo logic thuê càng lâu càng rẻ!";
+      }
+      previousDays = days;
+      previousPrice = price;
+    }
+    return null; 
   }
 
   String? _validateStep4() {
-  if (model.location.trim().isEmpty) return "Địa chỉ kho bãi không được để trống!";
-  if (model.features.isEmpty || model.features.any((f) => f.trim().isEmpty)) {
-    return "Vui lòng nhập đầy đủ các nội dung đặc điểm nổi bật!";
+    if (model.location.trim().isEmpty) return "Địa chỉ kho bãi không được để trống!";
+    if (model.features.isEmpty || model.features.any((f) => f.trim().isEmpty)) {
+      return "Vui lòng nhập đầy đủ các nội dung đặc điểm nổi bật!";
+    }
+    return null;
+    
   }
-  return null;
-}
 
   String? _validateStep5() {
-    if (activePolicies.isEmpty) {
-      return "Vui lòng thiết lập ít nhất 1 chính sách thuê.";
+    final treHan = activePolicies.firstWhere((p) => p.type == "Trễ hạn");
+    if (treHan.fineValue <= 0) {
+      return "Vui lòng thiết lập mức phí cho chính sách Trễ hạn!";
     }
 
-    final Set<String> checkedTypes = {};
-    for (var policy in activePolicies) {
-      if (policy.content.trim().isEmpty) {
-        return "Nội dung chi tiết của chính sách '${policy.type}' bắt buộc không được bỏ trống!";
+    final huHong = activePolicies.firstWhere((p) => p.type == "Hư hỏng");
+    if (huHong.unit == "PERCENT") {
+      if ((huHong.lightDamage ?? 0) <= 0 || 
+          (huHong.mediumDamage ?? 0) <= 0 || 
+          (huHong.heavyDamage ?? 0) <= 0) {
+        return "Vui lòng kiểm tra lại các mức bồi thường hư hỏng!";
       }
-
-      if (policy.type == "Khác") continue; 
-      
-      if (checkedTypes.contains(policy.type)) {
-        return "Chính sách '${policy.type}' đã tồn tại! Vui lòng không tạo trùng lặp mốc quy định này.";
-      }
-      checkedTypes.add(policy.type);
     }
     
-    return null;
+    return null; 
   }
 
   void prevStep() {
     if (_currentStep > 0) currentStep--;
   }
 
+  bool _isPicking = false; 
   Future<void> pickImages() async {
-    final List<XFile> pickedFiles = await _picker.pickMultiImage(imageQuality: 80);
-    if (pickedFiles.isNotEmpty) {
-      model.images.addAll(pickedFiles.map((file) => file.path).toList());
-      notifyListeners();
+    if (_isPicking) return; 
+
+    _isPicking = true; 
+
+    try {
+      final List<XFile> pickedFiles = await _picker.pickMultiImage(imageQuality: 80);
+      
+      if (pickedFiles.isNotEmpty) {
+        model.images.addAll(pickedFiles.map((file) => file.path).toList());
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Lỗi chọn nhiều ảnh: $e");
+    } finally {
+      _isPicking = false; 
     }
   }
 
@@ -243,14 +256,16 @@ class PostProductViewModel extends ChangeNotifier {
     setLoading(true); 
     try {
       model.tierPrices = tierPrices;
+      model.policies = activePolicies;
       model.quantity = model.quantity > 0 ? model.quantity : 1;
+      
       final success = await ApiService.submitProduct(
         product: model, 
         imageFiles: selectedFiles, 
       );
 
       if (success) {
-        currentStep = 7; 
+        currentStep = 6; 
       } else {
         errorMessage = "Đăng bài thất bại! Hệ thống kết nối API gặp sự cố kỹ thuật.";
       }
@@ -286,37 +301,172 @@ class PostProductViewModel extends ChangeNotifier {
     }
   }
 
-  List<PolicyModel> activePolicies = [];
 
+  double lightValue = 20.0;
+  double mediumValue = 50.0;
+  double heavyValue = 100.0;
+  List<PolicyModel> activePolicies = [
+    PolicyModel(type: "Trễ hạn"),
+    PolicyModel(type: "Hư hỏng"),
+    PolicyModel(type: "Hủy đơn"),
+    PolicyModel(type: "Mất sản phẩm"),
+  ];
 
-  void addNewPolicyField() {
-    activePolicies.add(PolicyModel(type: "Khác", content: "")); 
+  void updatePolicyFineValue(int index, double newValue) {
+    if (activePolicies[index].type == "Hủy đơn" || activePolicies[index].type == "Mất sản phẩm") return;
+    activePolicies[index].fineValue = newValue;
     notifyListeners();
   }
 
-  void removePolicyField(int index) {
-    if (index >= 0 && index < activePolicies.length) {
-      activePolicies.removeAt(index);
-      notifyListeners();
-    }
+  void updatePolicyUnit(int index, String newUnit) {
+    activePolicies[index].unit = newUnit;
+    notifyListeners();
   }
-  void updatePolicyType(int index, String newType) {
-    if (index >= 0 && index < activePolicies.length) {
-      String currentContent = activePolicies[index].content;
-      activePolicies[index] = PolicyModel(type: newType, content: currentContent);
-      notifyListeners(); 
-    }
+
+  void updateDamageValues(double l, double m, double h) {
+    debugPrint("UPDATE DAMAGE");
+    debugPrint("$l - $m - $h");
+
+    lightValue = l;
+    mediumValue = m;
+    heavyValue = h;
+
+    final policy = activePolicies.firstWhere((p) => p.type == "Hư hỏng");
+    policy.lightDamage = l;
+    policy.mediumDamage = m;
+    policy.heavyDamage = h;
+    notifyListeners();
   }
-  void updatePolicyContent(int index, String newContent) {
-    if (index >= 0 && index < activePolicies.length) {
-      String currentType = activePolicies[index].type;
-      activePolicies[index] = PolicyModel(type: currentType, content: newContent);
-      errorMessage = null;
-      notifyListeners(); 
-    }
-  }
+
+  
+
   void setLoading(bool v) {
     isLoading = v;
     notifyListeners();
   }
+
+
+         
+
+  Future<void> loadUserAddressBook() async {
+    isLoadingAddress = true;
+    addressErrorMessage = null;
+    notifyListeners(); 
+
+    try {
+     
+      final List<AddressModel> addresses = await AddressService.fetchUserAddresses();
+      userAddressBook = addresses;
+      if (userAddressBook.isNotEmpty && (model.addressId == 0 || model.addressId == null)) {
+        final defaultAddress = userAddressBook.firstWhere(
+          (addr) => addr.isDefault,
+          orElse: () => userAddressBook.first, 
+        );
+        model.addressId = defaultAddress.id ?? 0;
+        model.location = defaultAddress.fullAddress;
+      }
+    } catch (error) {
+      addressErrorMessage = error.toString().replaceAll("Exception: ", "");
+      debugPrint("Lỗi load sổ địa chỉ trong ViewModel: $error");
+    } finally {
+      isLoadingAddress = false;
+      notifyListeners(); 
+    }
+  }
+
+
+  void selectAddressFromBook(int addressId, String fullAddr) {
+    model.addressId = addressId; 
+    model.location = fullAddr;   
+    notifyListeners();           
+  }
+
+  Future<bool> addNewAddressToBook({
+    required String name,
+    required String phone,
+    required String address,
+    required bool isDefault
+  }) async {
+    isLoadingAddress = true;
+    addressErrorMessage = null;
+    notifyListeners();
+
+    try {
+      AddressModel newAddrData = AddressModel(
+        receiverName: name,
+        receiverPhone: phone,
+        fullAddress: address,
+        isDefault: isDefault, 
+      );
+
+   
+      AddressModel createdAddress = await AddressService.createNewAddress(newAddrData);
+      if (isDefault) {
+        userAddressBook = userAddressBook.map((addr) {
+          return AddressModel(
+            id: addr.id,
+            receiverName: addr.receiverName,
+            receiverPhone: addr.receiverPhone,
+            fullAddress: addr.fullAddress,
+            isDefault: false,
+          );
+        }).toList();
+      }
+      userAddressBook.add(createdAddress);
+    
+      model.addressId = createdAddress.id ?? 0;
+      model.location = createdAddress.fullAddress;
+      
+      return true;
+    } catch (error) {
+      addressErrorMessage = error.toString().replaceAll("Exception: ", "");
+      return false;
+    } finally {
+      isLoadingAddress = false;
+      notifyListeners();
+    }
+  }
+
+  String get categoryName {
+    if (model.categoryId == null || categoriesTreeData.isEmpty) {
+      return "Chưa phân loại";
+    }
+
+    try {
+      for (var mainCat in categoriesTreeData) {
+        for (var sub in mainCat.subCategories) {
+          if (sub.id == model.categoryId) {
+            return "${mainCat.categoryName} - ${sub.categoryName}"; 
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Lỗi phân rã dịch danh mục: $e");
+    }
+
+    return "Danh mục (#${model.categoryId})";
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      categoriesTreeData = await ApiService.getAllCategories();
+    
+      if (model.categoryId != null && categoriesTreeData.isNotEmpty) {
+        for (var mainCat in categoriesTreeData) {
+          bool hasSub = mainCat.subCategories.any((sub) => sub.id == model.categoryId);
+          if (hasSub) {
+            _selectedMainCategoryId = mainCat.id;
+            break;
+          }
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Lỗi đồng bộ cây danh mục tại ViewModel: $e");
+      errorMessage = "Không thể tải danh mục hệ thống!";
+      notifyListeners();
+    }
+  }
+
+  
 }

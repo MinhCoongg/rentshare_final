@@ -84,6 +84,9 @@ class PostProductScreen extends StatelessWidget {
 
   String _getStepTitle(int step) {
     const titles = ["Thông tin cơ bản", "Chi tiết sản phẩm", "Giá thuê", "Địa điểm", "Chính sách", "Xem trước", "Thành công"];
+    if (step >= titles.length) {
+    return "Hoàn thành đăng bài";
+  }
     return titles[step];
   }
 
@@ -102,7 +105,7 @@ class PostProductScreen extends StatelessWidget {
       case 5: 
         return ProductPreviewWidget(vm: vm); 
       case 6: 
-        return  _buildStep7(); 
+        return  _buildStep7(context); 
       default: 
         return const SizedBox();
     }
@@ -144,7 +147,41 @@ class PostProductScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStep7() {
-    return const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.check_circle, size: 100, color: Colors.green), SizedBox(height: 20), Text("Đăng bài thành công!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold))]));
+ 
+  Widget _buildStep7(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, size: 100, color: Colors.green),
+            const SizedBox(height: 20),
+
+            const Text(
+              "Đăng sản phẩm thành công!",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            
+            const Text(
+              "Sản phẩm của bạn đang được duyệt bởi đội ngũ RentShare. Bạn sẽ nhận được thông báo khi sản phẩm được hiển thị.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 30),
+
+            TextButton(
+              onPressed: () { 
+                  Navigator.pushNamedAndRemoveUntil(context, '/mainscreen', (route) => false);
+               },
+              child: const Text("Về trang chủ", style: TextStyle(color: Colors.grey)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
+
+
 }

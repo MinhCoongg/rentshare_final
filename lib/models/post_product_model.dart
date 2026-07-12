@@ -9,6 +9,7 @@ class PostProductModel {
   Map<int, String> dynamicAttributes = {};
   double depositAmount = 0.0;
   int quantity = 1;
+  int? addressId;
   String location = "";
   List<PolicyModel> policies = [];
   List<Map<String, dynamic>> tierPrices = [];
@@ -18,14 +19,13 @@ class PostProductModel {
       : 0.0;
 
   Map<String, dynamic> toJson() {
-    String featuresString = features.isNotEmpty ? features.join(' | ') : "";
     return {
       "basicInfo": {
         "categoryId": categoryId,
         "title": title,
         "description": description,
         "images": images,
-        "features": featuresString, 
+        "features": features, 
       },
       "details": dynamicAttributes.entries
           .map((entry) => {
@@ -36,17 +36,29 @@ class PostProductModel {
       "pricing": {
         "depositAmount": depositAmount,
         "quantity": quantity,
-        "tierPrices": tierPrices.map((tier) => {
+        
+        "tierPricings": this.tierPrices.map((tier) => {
               "minDays": tier["minDays"],
               "pricePerDay": tier["pricePerDay"],
             }).toList(),
       },
       "shipping": {
+        "addressId": addressId,
         "location": location,
       },
+      
+     
       "policies": policies
-          .map((policy) => policy.toJson())
-          .toList(),
+        .map((policy) => {
+          "type": policy.type,
+          "fineValue": policy.fineValue,
+          "unit": policy.unit,
+          "content": policy.content,
+          "lightDamage": policy.lightDamage,
+          "mediumDamage": policy.mediumDamage,
+          "heavyDamage": policy.heavyDamage,
+        })
+        .toList(),
     };
   }
   
@@ -59,6 +71,7 @@ class PostProductModel {
     features.clear(); 
     tierPrices.clear(); 
     depositAmount = 0.0;
+    addressId = 0;
     quantity = 1;
     location = "";
     policies.clear();

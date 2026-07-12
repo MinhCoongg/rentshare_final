@@ -6,9 +6,11 @@ import 'package:rentshare_app/constant/constant_url.dart';
 import 'package:rentshare_app/models/attribute_model.dart';
 import 'package:rentshare_app/models/category_model.dart';
 import 'package:rentshare_app/models/post_product_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rentshare_app/utils/sharetoken_utils.dart';
+
 
 class ApiService {
+<<<<<<< HEAD
   static Future<Map<String, dynamic>> getProductById(int id) async {
     final res = await http.get(
       Uri.parse("${ConstantURL.baseUrl}/products/$id"),
@@ -19,6 +21,9 @@ class ApiService {
       throw Exception("Failed to load product");
     }
   }
+=======
+  
+>>>>>>> origin/fix
 
   static Future<List<AttributeModel>> getCategoryFields(int categoryId) async {
     try {
@@ -62,31 +67,69 @@ class ApiService {
     required List<File> imageFiles,
   }) async {
     try {
-      final pref = await SharedPreferences.getInstance();
-      final token = pref.getString('token');
-      if (token == null) return false;
+      debugPrint("B1");
+
+
+      final token = await SharedPrefsUtils.getToken();
+      debugPrint("B3 Token = $token");
+
 
       var request = http.MultipartRequest(
         'POST',
         Uri.parse('${ConstantURL.baseUrl}/add-product'),
       );
 
+<<<<<<< HEAD
       request.headers.addAll({'Authorization': 'Bearer $token'});
+=======
+      debugPrint("B4");
+
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
+
+      debugPrint("B5");
+
+>>>>>>> origin/fix
       request.fields['body'] = jsonEncode(product.toJson());
+
+      debugPrint("B6");
 
       if (imageFiles.isNotEmpty) {
         for (var file in imageFiles) {
+          debugPrint("Adding file: ${file.path}");
+
           request.files.add(
+<<<<<<< HEAD
             await http.MultipartFile.fromPath('images', file.path),
+=======
+            await http.MultipartFile.fromPath(
+              'images',
+              file.path,
+            ),
+>>>>>>> origin/fix
           );
         }
       }
 
+      debugPrint("B7 Before Send");
+
       final streamedResponse = await request.send();
+
+      debugPrint("B8 After Send");
+
       final response = await http.Response.fromStream(streamedResponse);
-      return response.statusCode == 201 || response.statusCode == 200;
-    } catch (e) {
-      debugPrint('Lỗi đăng sản phẩm: $e');
+
+      debugPrint("B9 After Response");
+
+      debugPrint("StatusCode = ${response.statusCode}");
+      debugPrint("Response = ${response.body}");
+
+      return response.statusCode == 200 ||
+          response.statusCode == 201;
+    } catch (e, stack) {
+      debugPrint("ERROR = $e");
+      debugPrint("$stack");
       return false;
     }
   }

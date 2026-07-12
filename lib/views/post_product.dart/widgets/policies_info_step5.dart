@@ -1,247 +1,122 @@
 import 'package:flutter/material.dart';
+import 'package:rentshare_app/utils/format_utils.dart';
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
+import 'package:rentshare_app/models/policy_model.dart';
 
 class Step5PoliciesInfo extends StatelessWidget {
   final PostProductViewModel vm;
-
   const Step5PoliciesInfo({super.key, required this.vm});
 
   @override
   Widget build(BuildContext context) {
-    const List<String> policyTypesList = ["Hủy đơn", "Trễ hạn", "Hư hỏng", "Mất sản phẩm", "Điều kiện thuê", "Khác"];
-
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16), 
+      padding: const EdgeInsets.all(16),
       children: [
-        _buildPremiumCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "5. Chính sách thuê", 
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black)
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "Tự thiết lập các quy định bồi hoàn để người thuê nắm rõ trách nhiệm.",
-                style: TextStyle(color: Colors.grey[500], fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 20),
-              if (vm.activePolicies.isEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
-                  alignment: Alignment.center,
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(color: Colors.grey[50], shape: BoxShape.circle),
-                        child: Icon(Icons.gavel_outlined, size: 40, color: Colors.grey[300]),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "Chưa có quy định nào\nBấm nút bên dưới để tự tạo chính sách riêng", 
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey[400], fontSize: 13, height: 1.4, fontWeight: FontWeight.w500)
-                      ),
-                    ],
-                  ),
-                ),
-
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: vm.activePolicies.length,
-                itemBuilder: (context, index) {
-                  final policy = vm.activePolicies[index];
-                  
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8), 
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade100, width: 1.5),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: _getPolicyColor(policy.type).withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(_getPolicyIcon(policy.type), color: _getPolicyColor(policy.type), size: 16),
-                            ),
-                            const SizedBox(width: 10),
-                            
-                            Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButtonFormField<String>(
-                                  value: policyTypesList.contains(policy.type) ? policy.type : "Khác",
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
-                                  decoration: const InputDecoration(
-                                    contentPadding: EdgeInsets.zero,
-                                    border: InputBorder.none,
-                                  ),
-                                  icon: const Icon(Icons.arrow_drop_down, color: Colors.black54),
-                                  items: policyTypesList.map((String type) {
-                                    return DropdownMenuItem<String>(
-                                      value: type,
-                                      child: Text(type),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) => vm.updatePolicyType(index, value!),
-                                ),
-                              ),
-                            ),
-                            
-                            IconButton(
-                              constraints: const BoxConstraints(),
-                              padding: EdgeInsets.zero,
-                              icon: Icon(Icons.cancel_rounded, color: Colors.grey.shade400, size: 20),
-                              onPressed: () => vm.removePolicyField(index),
-                            )
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          key: ValueKey("user_policy_${index}_${policy.content.length}"),
-                          initialValue: policy.content,
-                          maxLines: 3,
-                          minLines: 2,
-                          keyboardType: TextInputType.multiline,
-                          style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.4, fontWeight: FontWeight.w500),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: const Color(0xFFFAFAFA),
-                            hintText: _getPolicyHint(policy.type),
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
-                            contentPadding: const EdgeInsets.all(12),
-                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade200)),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1.5)),
-                          ),
-                          onChanged: (v) => vm.updatePolicyContent(index, v),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: () => vm.addNewPolicyField(),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  height: 48,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF1976D2).withOpacity(0.4), width: 1.5),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_circle_outline_rounded, size: 18, color: Color(0xFF1976D2)),
-                      SizedBox(width: 8),
-                      Text(
-                        "Thêm chính sách mới", 
-                        style: TextStyle(color: Color(0xFF1976D2), fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F8FD),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.verified_user_outlined, color: Color(0xFF1976D2), size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("Quy định minh bạch", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Nội dung này sẽ hiển thị trực tiếp ở trang chi tiết sản phẩm. Hãy ghi rõ ràng để bảo vệ quyền lợi món đồ của ní nha.",
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12, height: 1.4, fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        _buildSectionHeader("Chính sách của bạn (Chỉnh sửa được)"),
+        _buildTrerHanCard(),
+        const SizedBox(height: 12),
+        _buildHuHongCard(),
+        const SizedBox(height: 24),
+        _buildSectionHeader("Quy định hệ thống (Thông tin)"),
+        _buildMatSanPhamCard(),
+        const SizedBox(height: 12),
+        _buildHuyDonCard(),
+        const SizedBox(height: 20),
+        _buildLuuYFooter(),
       ],
     );
   }
 
-  IconData _getPolicyIcon(String type) {
-    switch (type) {
-      case "Hủy đơn": return Icons.calendar_today_rounded;
-      case "Trễ hạn": return Icons.schedule_rounded;
-      case "Hư hỏng": return Icons.gpp_bad_rounded;
-      case "Mất sản phẩm": return Icons.error_outline_rounded;
-      case "Điều kiện thuê": return Icons.assignment_ind_rounded;
-      default: return Icons.more_horiz_rounded;
-    }
+  Widget _buildSectionHeader(String title) => 
+      Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.grey)));
+
+  Widget _buildTrerHanCard() {
+    final policy = vm.activePolicies.firstWhere((p) => p.type == "Trễ hạn");
+    final index = vm.activePolicies.indexOf(policy);
+    return _buildPolicyCard("Trễ hạn", Icons.schedule, Colors.orangeAccent, [
+      _buildModernSegmented(index, policy),
+      const SizedBox(height: 16),
+      Wrap(spacing: 10, children: (policy.unit == 'PERCENT' ? [5, 10, 15, 20, 25, 30, 50] : [20000, 50000, 100000, 200000]).map((val) => _buildChip(val, index, policy)).toList()),
+    ]);
   }
 
-  Color _getPolicyColor(String type) {
-    switch (type) {
-      case "Hủy đơn": return Colors.teal;
-      case "Trễ hạn": return Colors.orange;
-      case "Hư hỏng": return Colors.redAccent;
-      case "Mất sản phẩm": return Colors.purple;
-      case "Điều kiện thuê": return Colors.blue;
-      default: return Colors.blueGrey;
-    }
-  }
 
-  String _getPolicyHint(String type) {
-    switch (type) {
-      case "Hủy đơn": return "Ví dụ: Hoàn tiền 100% nếu chủ động hủy trước 24 giờ...";
-      case "Trễ hạn": return "Ví dụ: Phí trễ hạn phạt thêm 50.000đ cho mỗi ngày trả muộn...";
-      case "Hư hỏng": return "Ví dụ: Mọi vết trầy xước nặng do lỗi cố ý sẽ trừ thẳng vào cọc...";
-      case "Mất sản phẩm": return "Ví dụ: Đền bù 100% giá trị gốc của thiết bị theo giá thị trường...";
-      case "Điều kiện thuê": return "Ví dụ: Bắt buộc xuất trình CCCD gốc và ký biên bản giao nhận...";
-      default: return "Nhập nội dung quy chế riêng tư của ní...";
-    }
-  }
+  Widget _buildHuHongCard() {
+  return _buildPolicyCard("Hư hỏng", Icons.build, Colors.red, [
+    _buildSliderField("Hư nhẹ (Trầy xước)", vm.lightValue, 1, 20, (v) => vm.updateDamageValues(v, vm.mediumValue, vm.heavyValue)),
+    _buildSliderField("Hư vừa (Hỏng linh kiện)", vm.mediumValue, 21, 50, (v) => vm.updateDamageValues(vm.lightValue, v, vm.heavyValue)),
+    _buildSliderField("Hư nặng (Không dùng được)", vm.heavyValue, 51, 100, (v) => vm.updateDamageValues(vm.lightValue, vm.mediumValue, v)),
+  ]);
+}
 
-  Widget _buildPremiumCard({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          )
+Widget _buildSliderField(String label, double value, double min, double max, Function(double) onChanged) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text("${value.toInt()}%", style: TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold)),
         ],
       ),
-      child: child,
+      Slider(
+        value: value, min: min, max: max, divisions: (max - min).toInt(),
+        activeColor: Colors.orangeAccent,
+        onChanged: onChanged,
+      ),
+    ],
+  );
+}
+
+
+  
+
+  Widget _buildMatSanPhamCard() => _buildInfoCard("Mất sản phẩm", Icons.inventory, Colors.purple, "Đền bù 100% giá trị sản phẩm theo thị trường.");
+
+  Widget _buildHuyDonCard() => _buildInfoCard("Hủy đơn", Icons.cancel, Colors.teal, "Chưa duyệt: Hoàn 100% | Đã duyệt: Không được hủy.");
+
+
+  Widget _buildPolicyCard(String title, IconData icon, Color color, List<Widget> children) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [Icon(icon, color: color), SizedBox(width: 8), Text(title, style: TextStyle(fontWeight: FontWeight.bold))]),
+        const Divider(),
+        ...children,
+      ]),
     );
   }
+
+  Widget _buildInfoCard(String title, IconData icon, Color color, String desc) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [Icon(icon, color: color), SizedBox(width: 8), Text(title, style: TextStyle(fontWeight: FontWeight.bold))]),
+        const SizedBox(height: 8),
+        Text(desc, style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
+      ]),
+    );
+  }
+
+  Widget _buildChip(int val, int index, PolicyModel policy) => FilterChip(
+    label: Text(policy.unit == 'PERCENT' ? "$val%" : "${FormatUtils.formatMoney(double.parse(val.toString()))}đ"), 
+    selected: policy.fineValue == val.toDouble(),
+    onSelected: (_) => vm.updatePolicyFineValue(index, val.toDouble()),
+    selectedColor: Colors.orange.shade200,
+  );
+
+  Widget _buildModernSegmented(int index, PolicyModel policy) => Container(
+    padding: EdgeInsets.all(4), 
+    decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(10)), 
+    child: Row(children: [
+      _segmentItem("Cố định", policy.unit == 'VND', () => vm.updatePolicyUnit(index, 'VND')), 
+      _segmentItem("Theo %", policy.unit == 'PERCENT', () => vm.updatePolicyUnit(index, 'PERCENT'))
+    ])
+  );
+
+  Widget _segmentItem(String label, bool isSelected, VoidCallback onTap) => Expanded(child: GestureDetector(onTap: onTap, child: Container(padding: EdgeInsets.symmetric(vertical: 10), decoration: BoxDecoration(color: isSelected ? Colors.white : Colors.transparent, borderRadius: BorderRadius.circular(8)), child: Center(child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? Colors.blue.shade700 : Colors.grey))))));
+  Widget _buildLuuYFooter() => Container(padding: EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12)), child: Text("💡 Lưu ý: Các chính sách Hủy đơn và Mất sản phẩm được áp dụng theo quy định của hệ thống RentShare.", style: TextStyle(color: Colors.blue.shade800, fontSize: 12)));
 }

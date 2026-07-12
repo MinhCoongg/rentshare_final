@@ -1,10 +1,15 @@
 class ReviewModel {
   final String userName, userAvatar, comment, createdAt;
   final int rating;
+  final List<String> images; 
 
   ReviewModel({
-    required this.userName, required this.userAvatar,
-    required this.comment, required this.createdAt, required this.rating,
+    required this.userName, 
+    required this.userAvatar,
+    required this.comment, 
+    required this.createdAt, 
+    required this.rating,
+    this.images = const [],
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
@@ -13,7 +18,8 @@ class ReviewModel {
       userAvatar: json['userAvatar'] ?? '',
       comment: json['comment'] ?? '',
       createdAt: json['createdAt'] ?? '',
-      rating: json['rating'] ?? 5,
+      rating: (json['rating'] ?? 5).toInt(),
+      images: (json['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
     );
   }
 }

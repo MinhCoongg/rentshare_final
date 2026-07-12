@@ -71,4 +71,35 @@ class LoginServices {
       };
     }
   }
+<<<<<<< HEAD
 }
+=======
+
+  static Future<bool> registerUser({
+    required String name,
+    required String email,
+    required String phoneNumber,
+    required String password,
+  }) async {
+    final url = Uri.parse('${ConstantURL.baseUrl}/register');
+    
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'name': name,
+        'email': email,
+        'phoneNumber': phoneNumber,
+        'password': password,
+        'roleId': 2, 
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    } else {
+      final error = json.decode(response.body)['message'];
+      throw Exception(error ?? "Đăng ký thất bại");
+    }
+  }
+}
+>>>>>>> origin/fix

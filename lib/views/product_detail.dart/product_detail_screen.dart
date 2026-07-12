@@ -1,0 +1,287 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:rentshare_app/models/cart_model.dart';
+import 'package:rentshare_app/models/product_model.dart';
+import 'package:rentshare_app/utils/dialog_confirm.dart';
+import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
+import 'package:rentshare_app/views/cartpage/cart.dart';
+import 'package:rentshare_app/views/checkout_page/checkout.dart'; 
+import 'package:rentshare_app/views/post_product.dart/widgets/prolicies_detail_tab.dart';
+import 'package:rentshare_app/views/product_detail.dart/widget/detailProductTab.dart';
+import 'package:rentshare_app/views/product_detail.dart/widget/review.dart';
+import '../../viewmodels/product_detail_viewmodel.dart';
+
+class ProductDetailPage extends StatefulWidget {
+  final int productId;
+  final bool isAdmin;
+  const ProductDetailPage({super.key, required this.productId, this.isAdmin = false});
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> with TickerProviderStateMixin {
+  late TabController _tabController;
+  final PageController _pageController = PageController();
+  Timer? _timer;
+  int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _timer = Timer.periodic(const Duration(seconds: 5), (Timer timer) {
+      if (_pageController.hasClients && _pageController.position.maxScrollExtent > 0) {
+        int nextPage = _pageController.page!.toInt() + 1;
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const themeColor = Color(0xFF0056D2); 
+    return ChangeNotifierProvider(
+      create: (_) => ProductDetailViewModel()..loadProductDetail(widget.productId),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Consumer<ProductDetailViewModel>(
+          builder: (context, vm, child) {
+            if (vm.isLoading) return const Center(child: CircularProgressIndicator(color: themeColor));
+            if (vm.errorMessage != null) return Center(child: Text(vm.errorMessage!, style: const TextStyle(color: Colors.red)));
+            if (vm.product == null) return const Center(child: Text("Không có dữ liệu sản phẩm"));
+
+            final item = vm.product!;
+            return Stack(
+              children: [
+                NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                    _buildAppBar(item),
+                    _buildTabBar(item),
+                  ],
+                  body: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      DetailTab(item: item, isAdmin: widget.isAdmin,),
+                      ReviewTab(reviews: item.reviews), 
+                      PolicyTab(item: item), 
+                    ],
+                  ),
+                ),
+                _buildBottomAction(item, widget.isAdmin),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBar(ProductModel item) {
+    return SliverAppBar(
+      expandedHeight: 320,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: _circleBtn(Icons.arrow_back_ios_new, () => Navigator.pop(context)),
+      ),
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              itemCount: item.images.isEmpty ? 1 : 1000, 
+              onPageChanged: (i) {
+                if (item.images.isNotEmpty) {
+                  setState(() => _currentImageIndex = i % item.images.length);
+                }
+              },
+              itemBuilder: (c, i) {
+                if (item.images.isEmpty) {
+                  return Container(color: Colors.grey[200], child: const Icon(Icons.image_not_supported, size: 50));
+                }
+                final index = i % item.images.length;
+                return Image.network(
+                  item.images[index], 
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200], child: const Icon(Icons.image, size: 50)),
+                );
+              },
+            ),
+            if (item.images.isNotEmpty)
+              Positioned(
+                bottom: 20, right: 20,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
+                  child: Text(
+                    "${_currentImageIndex + 1}/${item.images.length}", 
+                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar(ProductModel item) {
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: _SliverAppBarDelegate(
+        TabBar(
+          controller: _tabController,
+          labelColor: const Color(0xFF0056D2),
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: const Color(0xFF0056D2),
+          indicatorWeight: 3,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          tabs: [
+            const Tab(text: "Chi tiết"),
+            Tab(text: "Đánh giá (${item.reviews.length})"), 
+            const Tab(text: "Chính sách")
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildBottomAction(ProductModel item, bool isAdmin) {
+    const themeColor = Color(0xFF0056D2);
+    Future<void> handleAddToCart(bool isCheckout) async {
+      final newItem = RentalCartItem(
+        productId: item.id,
+        ownerId: item.ownerId,
+        ownerAvatar: item.ownerAvatar,
+        ownerName: item.ownerName,
+        ownerPhone: item.shopInfo?.receiverPhone ?? '0789617936',
+        pricePerDay: double.tryParse(item.pricePerDay) ?? 0.0,
+        title: item.title,
+        image: item.images.isNotEmpty ? item.images.first : '',
+        quantity: 1,
+        maxStock: item.quantity,
+        depositAmount: double.tryParse(item.depositAmount) ?? 0.0,
+        ownerAddress: item.location,
+        tierPricings: item.tierPricings
+      );
+
+      final cartProvider = context.read<RentalCartProvider>();
+      String result = await cartProvider.addToCart(newItem);
+
+      if (result == 'DIFFERENT_SHOP') {
+        if (!mounted) return;
+        bool shouldClearCart = await DifferentShopDialog.show(
+          context: context,
+          title: "Thông báo khác Shop",
+          content: "Bạn đang có sản phẩm từ Shop khác trong đơn thuê. Bạn có muốn xóa giỏ hiện tại và thuê sản phẩm mới này không?",
+          actionButtonText: "Xóa giỏ và thêm",
+        );
+        if (shouldClearCart) {
+          await cartProvider.clearAndAddNewProduct(newItem);
+        } else {
+          return; 
+        }
+      }
+      if (!mounted) return;
+        if (isCheckout) {
+          await cartProvider.setCheckoutItem(newItem);
+          Navigator.push(
+            context, 
+            MaterialPageRoute(
+              builder: (context) => CheckoutPage(
+                product: newItem, 
+                shopAddress: newItem.ownerAddress 
+              )
+            )
+          );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Đã thêm sản phẩm vào giỏ thuê thành công!"),
+            backgroundColor: Color(0xff1B8A4B),
+            duration: Duration(milliseconds: 800),
+          ),
+        );
+
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => const CartPage())
+        );
+      }
+    }
+
+    if (isAdmin) return const SizedBox.shrink(); 
+
+    return Positioned(
+      bottom: 0, left: 0, right: 0,
+      child: Container(
+        padding: const EdgeInsets.only(top: 10, left: 16, right: 16, bottom: 10),
+        decoration: BoxDecoration(
+          color: Colors.white, 
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, -4))]
+        ),
+        child: SafeArea(
+          bottom: true, top: false,
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => handleAddToCart(false), 
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: themeColor,
+                    side: const BorderSide(color: themeColor, width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text("Thêm vào đơn thuê", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => handleAddToCart(true), 
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: themeColor, foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                  ),
+                  child: const Text("Thuê ngay", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _circleBtn(IconData i, VoidCallback t) => CircleAvatar(radius: 18, backgroundColor: Colors.white.withOpacity(0.9), child: IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: Icon(i, color: Colors.black, size: 18), onPressed: t));
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+  _SliverAppBarDelegate(this.tabBar);
+  @override double get minExtent => tabBar.preferredSize.height;
+  @override double get maxExtent => tabBar.preferredSize.height;
+  @override Widget build(c, s, o) => Container(color: Colors.white, child: tabBar);
+  @override bool shouldRebuild(_) => false;
+}
