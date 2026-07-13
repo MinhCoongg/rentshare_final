@@ -4,7 +4,6 @@ import 'package:rentshare_app/models/category_model.dart';
 import 'package:rentshare_app/models/producthome_model.dart';
 import 'package:rentshare_app/views/filterProduct/product_list_filter_screen.dart';
 import 'package:rentshare_app/views/home_product/widget/cardproduct.dart';
-import 'package:rentshare_app/views/home_product/widget/shoprate.dart';
 import 'package:rentshare_app/views/product_detail.dart/product_detail_screen.dart'; 
 import '../../viewmodels/home_viewmodel.dart';
 
@@ -54,13 +53,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: Colors.black, size: 24),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: Consumer<HomeViewModel>(
         builder: (context, vm, child) {
@@ -207,13 +199,6 @@ class _HomePageState extends State<HomePage> {
 
                 _buildSectionTitle("Có thể bạn quan tâm", themeColor),
                 _buildHorizontalProductList(vm.suggestedProducts, themeColor),
-
-                _buildSectionTitle("Shop được tin tưởng", themeColor),
-                HorizontalShopList(
-                  shopList: vm.trustedShops,
-                  themeColor: themeColor,
-                ),
-                const SizedBox(height: 40),
               ],
             ),
           );
@@ -229,10 +214,6 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87)),
-          TextButton(
-            onPressed: () {}, 
-            child: Text("Xem tất cả", style: TextStyle(color: themeColor, fontSize: 12, fontWeight: FontWeight.bold))
-          ),
         ],
       ),
     );

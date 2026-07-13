@@ -182,8 +182,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       ]),
                     ],
                   ),
-                  // Nút Favorite
-                  Positioned(top: -8, right: -4, child: IconButton(onPressed: () {}, icon: const Icon(Icons.favorite_border, size: 20))),
                 ],
               ),
             ),

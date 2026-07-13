@@ -55,7 +55,10 @@ class PostProductScreen extends StatelessWidget {
       elevation: 0,
       leading: vm.currentStep > 0 
         ? IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black), onPressed: () => vm.prevStep())
-        : IconButton(icon: const Icon(Icons.close, color: Colors.black), onPressed: () => Navigator.pop(context)),
+        : IconButton(icon: const Icon(Icons.close, color: Colors.black), onPressed: (){
+          context.read<PostProductViewModel>().reset();
+          Navigator.pushNamedAndRemoveUntil(context, '/mainscreen', (route) => false);
+        }),
       title: const Text("Đăng sản phẩm", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18)),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(50),
@@ -173,6 +176,7 @@ class PostProductScreen extends StatelessWidget {
 
             TextButton(
               onPressed: () { 
+                  context.read<PostProductViewModel>().reset();
                   Navigator.pushNamedAndRemoveUntil(context, '/mainscreen', (route) => false);
                },
               child: const Text("Về trang chủ", style: TextStyle(color: Colors.grey)),

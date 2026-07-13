@@ -24,7 +24,6 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
-      // Bỏ Row, dùng thẳng Padding hoặc đặt trực tiếp
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -34,7 +33,6 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
             _buildFilterBar(),
             const SizedBox(height: 16),
             
-            // Bảng sẽ tự động giãn ra chiếm hết không gian còn lại
             Expanded(child: _buildOrderTable()),
             
             const SizedBox(height: 16),
@@ -86,7 +84,7 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
             rows: vm.orders.map((order) {
               return DataRow(cells: [
                 DataCell(Text(order.orderCode, style: const TextStyle(fontWeight: FontWeight.bold))),
-               DataCell(
+                DataCell(
                 SizedBox(
                   width: 150,
                   child: Row(
@@ -171,7 +169,11 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
   final Map<String, String> statusMap = {
     'Tất cả': 'All',
     'Chờ duyệt': 'Pending',
-    'Đang thuê': 'Delivered', 
+    'Đã duyệt': 'Approved',
+    'Đang giao': 'Shipping',
+    'Đã giao': 'Delivered',
+    'Đã trả': 'Returned',
+    'Đang nghiệm thu': 'Inspecting',
     'Hoàn tất': 'Completed',
     'Đã hủy': 'Cancelled',
   };
@@ -185,7 +187,6 @@ class _RentalManagementScreenState extends State<RentalManagementScreen> {
     'Inspecting': 'Đang nghiệm thu',
     'Completed': 'Hoàn tất',
     'Cancelled': 'Đã hủy',
-    'Overdue': 'Quá hạn',
   };
 
   Widget _buildPagination(AdminProductViewModel vm) {

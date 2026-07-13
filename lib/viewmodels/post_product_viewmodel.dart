@@ -468,5 +468,41 @@ class PostProductViewModel extends ChangeNotifier {
     }
   }
 
+  void reset() {
+    _currentStep = 0;
+    isLoading = false;
+    errorMessage = null;
+    
+
+    model.images.clear();
+    model.title = '';
+    model.description = '';
+    model.quantity = 1;
+    model.categoryId = null;
+    model.depositAmount = 0.0;
+    model.location = '';
+    model.features.clear();
+    model.dynamicAttributes.clear();
+    model.addressId = 0;
+
+
+    categoryAttributes.clear();
+    _selectedMainCategoryId = null;
+
+    tierPrices = [{"minDays": 1, "pricePerDay": 0.0}];
+    
+    activePolicies = [
+      PolicyModel(type: "Trễ hạn"),
+      PolicyModel(type: "Hư hỏng"),
+      PolicyModel(type: "Hủy đơn"),
+      PolicyModel(type: "Mất sản phẩm"),
+    ];
+
+    lightValue = 20.0;
+    mediumValue = 50.0;
+    heavyValue = 100.0;
+    notifyListeners();
+  }
+
   
 }

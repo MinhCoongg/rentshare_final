@@ -16,7 +16,7 @@ class HomeViewModel extends ChangeNotifier {
   List<ProductHomeModel> _featuredProducts = [];
   List<ProductHomeModel> _newestProducts = [];
   List<ProductHomeModel> _suggestedProducts = [];
-  List<ShopHomeModel> _trustedShops = [];
+
   
 
   List<ProductHomeModel> _searchResults = [];
@@ -27,7 +27,6 @@ class HomeViewModel extends ChangeNotifier {
   List<ProductHomeModel> get featuredProducts => _featuredProducts;
   List<ProductHomeModel> get newestProducts => _newestProducts;
   List<ProductHomeModel> get suggestedProducts => _suggestedProducts;
-  List<ShopHomeModel> get trustedShops => _trustedShops;
 
   Future<void> fetchCategories() async {
     _isLoading = true;
@@ -56,7 +55,6 @@ class HomeViewModel extends ChangeNotifier {
       _newestProducts = resultMap['newest'] ?? [];
       _suggestedProducts = resultMap['suggested'] ?? [];
       
-      _trustedShops = resultMap['shops'] ?? []; 
     } catch (e) {
       debugPrint('Lỗi fetchProducts trong ViewModel: $e');
     }
