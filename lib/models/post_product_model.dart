@@ -13,6 +13,7 @@ class PostProductModel {
   String location = "";
   List<PolicyModel> policies = [];
   List<Map<String, dynamic>> tierPrices = [];
+  Map<int, int> dynamicUnits = {};
 
   double get pricePerDay => (tierPrices.isNotEmpty && tierPrices[0]['pricePerDay'] != null)
       ? (tierPrices[0]['pricePerDay'] as double)
@@ -31,6 +32,7 @@ class PostProductModel {
           .map((entry) => {
                 "id": entry.key,
                 "value": entry.value,
+                "unitId": dynamicUnits[entry.key],
               })
           .toList(),
       "pricing": {
@@ -75,5 +77,6 @@ class PostProductModel {
     quantity = 1;
     location = "";
     policies.clear();
+    dynamicUnits.clear();
   }
 }

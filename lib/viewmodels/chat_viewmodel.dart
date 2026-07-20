@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:rentshare_app/models/conversation.dart';
 import 'package:rentshare_app/models/message.dart';

@@ -18,7 +18,8 @@ class PaymentPage extends StatelessWidget {
     
     double depositTotal = cartProvider.totalDeposit; // Tổng tiền cọc của toàn bộ giỏ hàng
     double shippingFee = checkoutVM.getShippingFee(); // Phí ship (30k nếu chọn Shipping, 0đ nếu Pickup)
-    double totalOrderAmount = rentalFeeTotal + depositTotal + shippingFee;
+    double discountAmount = checkoutVM.appliedVoucher != null ? checkoutVM.discountAmount : 0.0;
+    double totalOrderAmount = (rentalFeeTotal + shippingFee - discountAmount) + depositTotal;
 
     bool isEnoughBalance = checkoutVM.walletBalance >= totalOrderAmount;
 
@@ -90,6 +91,18 @@ class PaymentPage extends StatelessWidget {
                         _buildPriceRow("Tiền cọc (hoàn lại)", depositTotal),
                         const SizedBox(height: 12),
                         _buildPriceRow("Phí vận chuyển", shippingFee),
+                        if (checkoutVM.appliedVoucher != null) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Giảm giá (${checkoutVM.appliedVoucher!.code})", 
+                                style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500)),
+                            Text("-${FormatUtils.formatMoney(checkoutVM.discountAmount)}đ", 
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red)),
+                          ],
+                        ),
+                      ],
                         const Divider(height: 32),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -192,7 +205,7 @@ class PaymentPage extends StatelessWidget {
                       } else if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text("Đặt đơn thất bại! Vui lòng kiểm tra lại lịch hoặc số dư ví"), 
+                            content: Text("Đặt đơn thất bại! Sản phẩm này đã bị trùng lịch, hãy chọn thời gian khác"), 
                             backgroundColor: Colors.red,
                           )
                         );

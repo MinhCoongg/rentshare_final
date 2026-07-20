@@ -103,6 +103,7 @@ class _RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.only(bottom: 15),
       child: TextFormField(
         controller: controller,
+        keyboardType: hint == "Số điện thoại" ? TextInputType.phone : TextInputType.text,
         obscureText: isPass ? (isConfirm ? !_isConfirmPasswordVisible : !_isPasswordVisible) : false,
         decoration: InputDecoration(
           filled: true,

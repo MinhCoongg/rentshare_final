@@ -214,12 +214,7 @@ class RentalOrderViewModel extends ChangeNotifier {
 
   Future<DamageReport?> fetchDamageReportDirect(int rentalRequestId) async {
     try {
-
-
-
       _damageReport = await _orderService.getDamageReport(rentalRequestId);
-      
-      
       return _damageReport; 
     } catch (e) {
       _isLoading = false;
@@ -249,6 +244,9 @@ class RentalOrderViewModel extends ChangeNotifier {
   }
 
 
+  int getOwnerByStatus(String status){
+    return _ownerOrders.where((order) => order.status == status).length;
+  }
 
 
   void toggleProductSelection(int productId, bool isSelected) {

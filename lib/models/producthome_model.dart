@@ -7,12 +7,13 @@ class ProductHomeModel {
   final String depositAmount;
   final double minPrice;
   final int quantity;
-  final String status;
+  String status;
   final String createdAt;
   final String location; 
   final String images; 
   final double rating;     
-  final int reviewCount;   
+  final int reviewCount;
+
 
   ProductHomeModel({
     required this.id,

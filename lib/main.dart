@@ -14,6 +14,7 @@ import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/review_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/shop_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/voucher_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/wallet_viewmodel.dart';
 import 'package:rentshare_app/viewmodels/wishlist_viewmodel.dart';
 import 'package:rentshare_app/views/home_product/homeProduct.dart';
@@ -46,7 +47,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => WalletViewModel()),
         ChangeNotifierProvider(create: (_) => ShopViewModel()),
         ChangeNotifierProvider(create: (_) => ChatViewModel()),
-        
+        ChangeNotifierProvider(create: (_) => VoucherViewModel()),
 
 
       ],

@@ -157,12 +157,12 @@ class _LoginViewState extends State<LoginView> {
                                       String? errorMessage = await viewModel.loginWithApi(context);
                                       if (context.mounted) {
                                         if (errorMessage == null) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Đăng nhập thành công!'),
-                                              backgroundColor: Color(0xff1B8A4B),
-                                            ),
-                                          );
+                                          // ScaffoldMessenger.of(context).showSnackBar(
+                                          //   const SnackBar(
+                                          //     content: Text('Đăng nhập thành công!'),
+                                          //     backgroundColor: Color(0xff1B8A4B),
+                                          //   ),
+                                          // );
                                           if (errorMessage == null) {
                                           
                                             final String role = viewModel.userRole; 

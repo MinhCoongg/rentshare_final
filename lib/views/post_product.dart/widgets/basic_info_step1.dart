@@ -4,6 +4,7 @@ import 'package:rentshare_app/models/category_model.dart';
 import 'package:rentshare_app/models/subcategory_model.dart'; 
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
 import 'package:rentshare_app/views/post_product.dart/widgets/common_widget.dart';
+import 'package:rentshare_app/views/post_product.dart/widgets/product_criteria.dart';
 
 class Step1BasicInfo extends StatefulWidget {
   final PostProductViewModel vm;
@@ -152,6 +153,17 @@ class _Step1BasicInfoState extends State<Step1BasicInfo> {
                 child: Text(
                   "$_descLength/1000",
                   style: TextStyle(color: Colors.grey[400], fontSize: 12, fontWeight: FontWeight.w500),
+                ),
+              ),
+
+              GestureDetector(
+                onTap: () => showDialog(context: context, builder: (_) => CriteriaPopup()),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue, size: 16),
+                    SizedBox(width: 5),
+                    Text("Xem tiêu chí kiểm duyệt sản phẩm", style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline)),
+                  ],
                 ),
               ),
             ],

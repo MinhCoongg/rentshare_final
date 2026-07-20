@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rentshare_app/models/damageReport.dart'; 
+import 'package:rentshare_app/models/damageReport.dart';
+import 'package:rentshare_app/models/rentalOrderDetail.dart'; 
 import 'package:rentshare_app/viewmodels/rental_order_viewmodel.dart';
 import 'package:rentshare_app/utils/format_utils.dart';
 
 class ChiTietBaoCaoScreen extends StatefulWidget {
   final int orderId;
-  final dynamic order;
+  final RentalOrderDetailModel order;
 
   const ChiTietBaoCaoScreen({super.key, required this.orderId, required this.order});
 
@@ -78,7 +79,7 @@ class _ChiTietBaoCaoScreenState extends State<ChiTietBaoCaoScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8), 
                       child: Image.network(
-                        '${report.evidence}', 
+                        report.evidence, 
                         height: 150, 
                         width: double.infinity, 
                         fit: BoxFit.cover,
@@ -91,16 +92,26 @@ class _ChiTietBaoCaoScreenState extends State<ChiTietBaoCaoScreen> {
 
                 _buildSection("Chi tiết phí phát sinh", [
                 _rowPrice("Tiền cọc ban đầu", widget.order.depositFee.toString()),
-                
-  
                 _rowPrice("Tiền thuê sản phẩm", "- ${widget.order.rentalFee.toString()}", color: Colors.red[700]),
+                _rowPrice("Phí vận chuyển", "- ${widget.order.shippingFee.toString()}", color: Colors.red[700]),
                 _rowPrice("Phí đền bù hư hỏng", "- ${report.compensationAmount.toString()}", color: Colors.red[700]),
-                
+                if (widget.order.discountAmount != null && widget.order.discountAmount! > 0) 
+                _rowPrice(
+                  "Voucher giảm giá", 
+                  "+ ${widget.order.discountAmount.toString()}", 
+                  color: Colors.green[700]
+                ),
                 const Divider(thickness: 1, height: 24),
-                
                 _rowPrice(
                   "Số tiền hoàn lại cọc", 
-                  (double.parse(widget.order.depositFee) - double.parse(widget.order.rentalFee) - report.compensationAmount - double.parse(widget.order.shippingFee)).toString(), 
+                  [
+                    0.0, 
+                    (double.parse(widget.order.depositFee) 
+                      - double.parse(widget.order.rentalFee) 
+                      - report.compensationAmount 
+                      - double.parse(widget.order.shippingFee) 
+                      + (widget.order.discountAmount ?? 0))
+                  ].reduce((a, b) => a > b ? a : b).toString(), // Lấy giá trị lớn hơn giữa 0 và kết quả tính toán
                   isTotal: true
                 ),
               ]),

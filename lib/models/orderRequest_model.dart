@@ -12,6 +12,8 @@ class RentalOrderRequestModel {
   final double depositFee;
   final double totalAmount;
   final List<RentalCartItem> items;
+  final int? voucherId;
+  final double discountAmount;
 
   RentalOrderRequestModel({
     required this.startDate,
@@ -25,6 +27,8 @@ class RentalOrderRequestModel {
     required this.depositFee,
     required this.totalAmount,
     required this.items,
+    this.voucherId,
+    required this.discountAmount,
   });
 
   Map<String, dynamic> toJson() {
@@ -45,6 +49,8 @@ class RentalOrderRequestModel {
         "rentalFeeSnapshot": e.pricePerDay, 
         "depositFeeSnapshot": e.depositAmount, 
       }).toList(),
+      'voucherId': voucherId,
+      'discountAmount': discountAmount,
     };
   }
 }

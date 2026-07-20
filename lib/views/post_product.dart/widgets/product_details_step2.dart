@@ -2,13 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:rentshare_app/viewmodels/post_product_viewmodel.dart';
 import 'package:rentshare_app/views/post_product.dart/widgets/common_widget.dart';
 
-class Step2ProductDetail extends StatelessWidget {
+class Step2ProductDetail extends StatefulWidget {
   final PostProductViewModel vm;
-
   const Step2ProductDetail({super.key, required this.vm});
 
   @override
+  State<Step2ProductDetail> createState() => _Step2ProductDetailState();
+}
+
+class _Step2ProductDetailState extends State<Step2ProductDetail> {
+  @override
+  void initState() {
+    super.initState();
+    widget.vm.loadUnitsForAttributes(widget.vm.categoryAttributes);
+  }
+  @override
   Widget build(BuildContext context) {
+    final vm = widget.vm;
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       children: [
@@ -21,20 +31,88 @@ class Step2ProductDetail extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)
               ),
               const SizedBox(height: 10),
-              
               ...vm.categoryAttributes.map((attr) {
                 final String name = attr.attributeName.trim();
+                final units = vm.getUnitsForAttribute(attr.id);
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: CustomTextField(
-                    key: ValueKey("attr_${attr.id}"), 
-                    label: "$name *",
-                    hint: _getHintText(name),
-                    initialValue: vm.model.dynamicAttributes[attr.id] ?? "",
-                    onChanged: (v) => vm.updateAttribute(attr.id, v),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (units.isNotEmpty) ...[
+                        Text("$name *", style: const TextStyle(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        Row(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: CustomTextField(
+                                key: ValueKey("attr_val_${attr.id}"),
+                                label: "", 
+                                hint: "Nhập số",
+                                keyboardType: TextInputType.number,
+                                initialValue: vm.attributeValues[attr.id] ?? "",
+                                onChanged: (v) => vm.updateAttributeValue(attr.id, v),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                            flex: 1,
+                            child: SizedBox(
+                              height: 56,
+                              child: DropdownButtonFormField<int>(
+                                value: vm.selectedUnits[attr.id],
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.grey[50],
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: Colors.grey.shade300),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(color: Color(0xFF1976D2)),
+                                  ),
+                                ),
+                                hint: const Text("Đơn vị"),
+                                isExpanded: true,
+                                items: units.map((unit) {
+                                  return DropdownMenuItem<int>(
+                                    value: unit.id,
+                                    child: Text(unit.unitName),
+                                  );
+                                }).toList(),
+                                onChanged: (unitId) {
+                                  setState(() {
+                                    vm.updateAttributeUnit(attr.id, unitId!);
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                          ],
+                        ),
+                      ] 
+                      else ...[
+                        CustomTextField(
+                          key: ValueKey("attr_${attr.id}"),
+                          label: "$name *",
+                          hint: _getHintText(name),
+                          initialValue: vm.attributeValues[attr.id] ?? "",
+                          onChanged: (v) => vm.updateAttributeValue(attr.id, v),
+                        ),
+                      ],
+                    ],
                   ),
                 );
               }),
+              
             ],
           ),
         ),

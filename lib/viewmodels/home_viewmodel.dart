@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rentshare_app/models/category_model.dart';
-import 'package:rentshare_app/models/producthome_model.dart'; // File này chứa cả ProductHomeModel và ShopHomeModel của ní
-import 'package:rentshare_app/models/shop_model.dart';
+import 'package:rentshare_app/models/productCriteria_model.dart';
+import 'package:rentshare_app/models/producthome_model.dart'; 
 import 'package:rentshare_app/services/home_services.dart';
 import 'package:rentshare_app/services/product_services.dart'; 
 
@@ -16,12 +16,12 @@ class HomeViewModel extends ChangeNotifier {
   List<ProductHomeModel> _featuredProducts = [];
   List<ProductHomeModel> _newestProducts = [];
   List<ProductHomeModel> _suggestedProducts = [];
-
+  List<ProductCriteria> _criteriaList = [];
   
 
   List<ProductHomeModel> _searchResults = [];
   List<CategoryModel> get categories => _categories;
-
+  List<ProductCriteria> get criteriaList => _criteriaList;
   bool get isLoading => _isLoading;
   
   List<ProductHomeModel> get featuredProducts => _featuredProducts;
@@ -82,5 +82,11 @@ class HomeViewModel extends ChangeNotifier {
     debugPrint('$products');
     return products.isNotEmpty;
   }
-  
+  Future<void> fetchCriteria() async {
+    try {
+      _criteriaList = await _productService.fetchCriteria();
+    } catch (e) {
+      debugPrint("Lỗi ProductApprovalViewModel: $e");
+    }
+  }
 }

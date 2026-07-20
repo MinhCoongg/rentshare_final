@@ -45,7 +45,7 @@ class PostProductScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNav(vm),
+      bottomNavigationBar: vm.currentStep < 6 ? _buildBottomNav(vm) : null,
     );
   }
 
@@ -168,7 +168,7 @@ class PostProductScreen extends StatelessWidget {
             const SizedBox(height: 12),
             
             const Text(
-              "Sản phẩm của bạn đang được duyệt bởi đội ngũ RentShare. Bạn sẽ nhận được thông báo khi sản phẩm được hiển thị.",
+              "Sản phẩm của bạn đang được duyệt bởi Admin. Vui lòng chờ!.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),

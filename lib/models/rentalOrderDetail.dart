@@ -22,6 +22,8 @@ class RentalOrderDetailModel {
   final String? trackingNumber;    
   final String? note;   
   final List<OrderDetailItem> items;
+  final int? voucherId;      
+  final double? discountAmount;
 
   RentalOrderDetailModel({
     required this.id,
@@ -47,6 +49,8 @@ class RentalOrderDetailModel {
     this.trackingNumber,
     this.note,
     required this.items,
+    this.voucherId,
+    this.discountAmount
   });
 
   factory RentalOrderDetailModel.fromJson(Map<String, dynamic> json) {
@@ -76,6 +80,8 @@ class RentalOrderDetailModel {
       items: (json['items'] as List? ?? [])
           .map((item) => OrderDetailItem.fromJson(item))
           .toList(),
+     voucherId: json['voucherId'] != null ? int.tryParse(json['voucherId'].toString()) : null,
+      discountAmount: json['discountAmount'] != null ? double.tryParse(json['discountAmount'].toString()) : null,
     );
   }
 }

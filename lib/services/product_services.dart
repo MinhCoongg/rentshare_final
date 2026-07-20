@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:rentshare_app/constant/constant_url.dart';
+import 'package:rentshare_app/models/productCriteria_model.dart';
 import 'package:rentshare_app/models/product_model.dart';
 import 'package:rentshare_app/models/producthome_model.dart';
 import 'package:rentshare_app/utils/sharetoken_utils.dart'; 
@@ -85,4 +86,28 @@ class ProductDetailService {
       return [];
     }
   }
+
+  Future<List<ProductCriteria>> fetchCriteria() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ConstantURL.baseUrl}/product-criteria'), 
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> resData = jsonDecode(response.body);
+        if (resData['success'] == true) {
+          final List<dynamic> listData = resData['data'] ?? [];
+          return listData.map((json) => ProductCriteria.fromJson(json)).toList();
+        }
+      } else {
+        debugPrint("LỖI STATUS CODE: ${response.statusCode}");
+      }
+      return [];
+    } catch (e) {
+      debugPrint("Lỗi fetchCriteria: $e");
+      return [];
+    }
+  }
+
+
 }

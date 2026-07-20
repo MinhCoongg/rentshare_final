@@ -5,7 +5,9 @@ import 'package:rentshare_app/models/address_model.dart';
 import 'package:rentshare_app/models/attribute_model.dart';
 import 'package:rentshare_app/models/category_model.dart';
 import 'package:rentshare_app/models/policy_model.dart';
+import 'package:rentshare_app/models/unit_model.dart';
 import 'package:rentshare_app/services/address_services.dart';
+import 'package:rentshare_app/services/unit_service.dart';
 import '../models/post_product_model.dart';
 import '../services/api_services.dart';
 
@@ -154,15 +156,20 @@ class PostProductViewModel extends ChangeNotifier {
     if (categoryAttributes.isEmpty) return null;
     for (final attr in categoryAttributes) {
       if (attr.id == 2) continue; 
-      final value = model.dynamicAttributes[attr.id];
-      if (value == null || value.toString().trim().isEmpty) {
-        return "Trường thông tin thông số '${attr.attributeName}' bắt buộc không được bỏ trống!";
+      final value = attributeValues[attr.id];
+      if (value == null || value.trim().isEmpty) {
+        return "Trường thông tin '${attr.attributeName}' bắt buộc không được bỏ trống!";
+      }
+      final units = getUnitsForAttribute(attr.id);
+      if (units.isNotEmpty && selectedUnits[attr.id] == null) {
+        return "Vui lòng chọn đơn vị cho '${attr.attributeName}'!";
       }
     }
     return null;
   }
 
  String? _validateStep3() {
+    syncDataToModel();
     if (model.depositAmount <= 0) {
       return "Vui lòng thiết lập khoản tiền đặt cọc bảo đảm lớn hơn 0đ.";
     }
@@ -190,6 +197,11 @@ class PostProductViewModel extends ChangeNotifier {
       previousPrice = price;
     }
     return null; 
+  }
+
+  void syncDataToModel() {
+    model.dynamicAttributes = Map<int, String>.from(attributeValues);
+    model.dynamicUnits = Map<int, int>.from(selectedUnits);
   }
 
   String? _validateStep4() {
@@ -258,6 +270,8 @@ class PostProductViewModel extends ChangeNotifier {
       model.tierPrices = tierPrices;
       model.policies = activePolicies;
       model.quantity = model.quantity > 0 ? model.quantity : 1;
+      // model.dynamicAttributes = Map<int, String>.from(attributeValues);
+      // model.dynamicUnits = Map<int, int>.from(selectedUnits);
       
       final success = await ApiService.submitProduct(
         product: model, 
@@ -502,6 +516,39 @@ class PostProductViewModel extends ChangeNotifier {
     mediumValue = 50.0;
     heavyValue = 100.0;
     notifyListeners();
+  }
+
+
+  Map<int, List<UnitModel>> unitsMap = {};
+  Map<int, String> attributeValues = {};
+  Map<int, int> selectedUnits = {};
+
+
+  Future<void> loadUnitsForAttributes(List<dynamic> attributes) async {
+    for (var attr in attributes) {
+      try {
+        final units = await UnitService.fetchUnitsByAttribute(attr.id);
+        unitsMap[attr.id] = units;
+      } catch (e) {
+        print("Lỗi tải đơn vị cho ${attr.id}: $e");
+      }
+    }
+    notifyListeners(); // Báo cho giao diện cập nhật
+  }
+
+  // Cập nhật giá trị số
+  void updateAttributeValue(int attrId, String value) {
+    attributeValues[attrId] = value;
+  }
+
+  // Cập nhật unitId
+  void updateAttributeUnit(int attrId, int unitId) {
+    selectedUnits[attrId] = unitId;
+  }
+
+  // Lấy danh sách đơn vị cho UI
+  List<UnitModel> getUnitsForAttribute(int attrId) {
+    return unitsMap[attrId] ?? [];
   }
 
   

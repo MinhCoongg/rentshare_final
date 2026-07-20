@@ -27,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<AuthProvider>().loadAuthData();
       context.read<RentalOrderViewModel>().loadMyOrders();
+      context.read<RentalOrderViewModel>().loadOwnerOrders(status: 'Pending');
       Provider.of<WalletViewModel>(context, listen: false).fetchWallet();
     });
   }
@@ -251,7 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text("Bạn chưa có sản phẩm"),
-                    content: const Text("Hãy đăng sản phẩm đầu tiên của ní để bắt đầu quản lý nhé!"),
+                    content: const Text("Hãy đăng sản phẩm đầu tiên của bạn để bắt đầu quản lý nhé!"),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
@@ -334,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             () {
               Navigator.push(
                 context, 
-                MaterialPageRoute(builder: (context) => const WishlistScreen()), // Ní push qua màn hình Wishlist vừa tạo
+                MaterialPageRoute(builder: (context) => const WishlistScreen()), 
               );
             }
           ),
@@ -344,12 +345,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildMenuItem(IconData icon, String title, String subtitle, VoidCallback onTap) {
+    final orderVm = context.watch<RentalOrderViewModel>();
+    int count = title == 'Duyệt sản phẩm'
+    ? orderVm.getOwnerByStatus('Pending')
+    : 0;
     return ListTile(
       leading: Icon(icon, color: Colors.blue),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+      trailing: count > 0 ? Badge(
+        isLabelVisible: count > 0,
+        label: Text(count.toString()),
+        child: const SizedBox.shrink(),
+      )
+      : null,
       onTap: onTap,
+
     );
   }
 }

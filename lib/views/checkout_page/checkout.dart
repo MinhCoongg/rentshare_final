@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rentshare_app/viewmodels/checkout_viewmodel.dart';
-import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart'; 
+import 'package:rentshare_app/viewmodels/rental_cart_viewmodel.dart';
+import 'package:rentshare_app/viewmodels/voucher_viewmodel.dart'; 
 import 'package:rentshare_app/views/checkout_page/widget/formAddress.dart';
 import 'package:rentshare_app/views/checkout_page/widget/selected_addresses.dart';
+import 'package:rentshare_app/views/checkout_page/widget/voucher_section.dart';
 import 'package:rentshare_app/views/payment/payment.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -28,7 +30,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cartProvider = Provider.of<RentalCartProvider>(context, listen: false);
       final checkoutVM = context.read<CheckoutViewModel>();
-      
+      checkoutVM.resetCheckout();
+      context.read<VoucherViewModel>().loadVouchers();
       checkoutVM.setCartItems(cartProvider.items);
       checkoutVM.fetchCheckoutData();
     });
@@ -327,6 +330,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ],
                     ),
                   ),
+                  VoucherSectionWidget(checkoutVM: checkoutVM),
                 ],
               ),
             ),

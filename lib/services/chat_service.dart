@@ -18,11 +18,10 @@ class ChatService {
        return;
     }
 
-    socket = IO.io('https://servertddnh-production.up.railway.app/', IO.OptionBuilder()
+    socket = IO.io('https://server-rentshare-production.up.railway.app/', IO.OptionBuilder()
         .setTransports(['websocket']) 
         .disableAutoConnect()
         .build());
-
     socket.connect(); 
 
     socket.onConnect((_) {

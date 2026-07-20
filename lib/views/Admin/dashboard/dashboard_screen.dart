@@ -86,7 +86,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           StatCard(
             title: "Doanh thu", 
-            count: "${FormatUtils.formatMoney(stats.totalRevenue/1000000 )}M",
+            count: "${FormatUtils.formatMoney(stats.totalRevenue)}đ",
             color: Colors.deepPurple, 
             icon: Icons.attach_money
           ),
@@ -269,7 +269,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     sections: stats.asMap().entries.map((e) {
                       return PieChartSectionData(
                         value: e.value.rentalCount.toDouble(),
-                        color: _getCategoryColor(e.key), // Hàm lấy màu cho từng lát
+                        color: _getCategoryColor(e.key), 
                         radius: 50,
                         showTitle: false,
                       );

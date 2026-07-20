@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -119,7 +120,7 @@ class _ReturnOrderScreenState extends State<ReturnOrderScreen> {
         ),
         ..._selectedImages.map((file) => Stack(
           children: [
-            Positioned.fill(child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(File(file.path), fit: BoxFit.cover))),
+            Positioned.fill(child: ClipRRect(borderRadius: BorderRadius.circular(12), child: kIsWeb ? Image.network(file.path, fit: BoxFit.cover) :Image.file(File(file.path), fit: BoxFit.cover)  )),
             Positioned(right: 4, top: 4, child: GestureDetector(onTap: () => setState(() => _selectedImages.remove(file)), child: const CircleAvatar(radius: 10, backgroundColor: Colors.red, child: Icon(Icons.close, size: 12, color: Colors.white))))
           ],
         )),

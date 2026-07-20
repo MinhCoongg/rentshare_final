@@ -3,6 +3,7 @@ import 'package:rentshare_app/models/address_model.dart';
 import 'package:rentshare_app/models/cart_model.dart';
 import 'package:rentshare_app/models/orderRequest_model.dart';
 import 'package:rentshare_app/models/tierPerDay_model.dart';
+import 'package:rentshare_app/models/voucher_model.dart';
 import 'package:rentshare_app/services/address_services.dart';
 import 'package:rentshare_app/services/bookdateProduct_service.dart'; 
 import 'package:rentshare_app/services/checkout_service.dart';
@@ -18,7 +19,11 @@ class CheckoutViewModel extends ChangeNotifier {
   List<AddressModel> _userAddresses = [];
   List<String> _bookedDates = [];
   List<RentalCartItem> _currentCartItems = [];
-
+  List<RentalCartItem> get cartitem => _currentCartItems;
+  Voucher? _appliedVoucher; 
+  double _discountAmount = 0.0;
+  double get discountAmount => _discountAmount;
+  Voucher? get appliedVoucher => _appliedVoucher;
   bool get isLoading => _isLoading;
   double get walletBalance => _walletBalance;
   AddressModel? get defaultAddress => _defaultAddress; 
@@ -139,6 +144,8 @@ class CheckoutViewModel extends ChangeNotifier {
       }
       
       double totalAmount = rentalFee + shippingFee + depositFee;
+      double discount = _appliedVoucher != null ? _discountAmount : 0.0;
+      double finalTotalAmount = totalAmount - discount;
       String dbShippingMethod = (_deliveryMethod == 'Shipping') 
           ? 'DeliverToHome' 
           : 'SelfPickUp';
@@ -152,10 +159,11 @@ class CheckoutViewModel extends ChangeNotifier {
         shippingFee: shippingFee,
         rentalFee: rentalFee,
         depositFee: depositFee,
-        totalAmount: totalAmount,
+        totalAmount: finalTotalAmount,
         items: cartItems,
+        voucherId: _appliedVoucher?.id,
+        discountAmount: discount,
       );
-
 
       final res = await _checkoutService.submitRentalOrder(
         orderData: orderRequest, 
@@ -184,4 +192,42 @@ class CheckoutViewModel extends ChangeNotifier {
         debugPrint("Lỗi cập nhật số dư: $e");
       }
   }
+
+  
+
+  void applyVoucher(Voucher voucher) {
+    _appliedVoucher = voucher;
+    _discountAmount = _calculateDiscountValue();
+    notifyListeners(); 
+  }
+
+
+  void removeVoucher() {
+    _appliedVoucher = null;
+    notifyListeners();
+  }
+
+
+  double _calculateDiscountValue() {
+    if (_appliedVoucher == null) return 0.0;
+    
+    double rentalFee = calculateTotalRentalFee(_currentCartItems);
+    double shippingFee = getShippingFee();
+    double currentTotal = rentalFee + shippingFee; 
+
+    if (_appliedVoucher!.discountType == 'PERCENT') {
+      double discount = (currentTotal * _appliedVoucher!.discountValue) / 100;
+      return discount > _appliedVoucher!.maxDiscountAmount ? _appliedVoucher!.maxDiscountAmount : discount;
+    } else {
+      return _appliedVoucher!.discountValue;
+    }
+  }
+
+
+  void resetCheckout() {
+    _appliedVoucher = null;
+    _selectedDateRange = null;
+    _deliveryMethod = 'Shipping';
+  }
+
 }

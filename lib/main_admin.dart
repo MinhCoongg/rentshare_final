@@ -24,7 +24,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => RentalCartProvider()),
         ChangeNotifierProvider(create: (_) => ChatViewModel()),
         ChangeNotifierProvider(create: (_) => UserViewModel()),
-        ChangeNotifierProvider(create: (_) => DashboardViewModel())
+        ChangeNotifierProvider(create: (_) => DashboardViewModel()),
       ],
       child: MaterialApp(
         title: 'RentShare Admin',
